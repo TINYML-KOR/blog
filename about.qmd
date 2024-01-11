@@ -1,5 +1,5 @@
 ---
-title: "TinyML KOR Study Group"
+title: "Study Group"
 image: TinyML.png
 about:
   template: jolla
@@ -11,3 +11,10 @@ about:
 ---
 
 @Gueltto9th
+
+# Group Members
+
+- []()
+- []()
+- []()
+- []()
