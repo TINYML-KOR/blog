@@ -1,5 +1,5 @@
 ---
-title: "b"
+title: "Study Archieve"
 listing:
   contents: posts
   sort: "date desc"
