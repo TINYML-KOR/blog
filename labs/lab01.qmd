@@ -1,0 +1,66 @@
+---
+toc: true
+title: "Lab 1"
+description: Introduction - Machine Learning for Graphs
+author: "who"
+date: "2024-07-06"
+categories: [LEC01]
+---
+
+# TinyML
+
+- members
+    - 이정연
+    - 오승현
+    - 성기정
+
+### TinyML and Efficient Deep Learning Computing
+강의 사이트: [https://hanlab.mit.edu/courses/2023-fall-65940](https://hanlab.mit.edu/courses/2023-fall-65940)
+
+- 목표: 강의 영상 리뷰 및 Lab 실습 완료
+    - Github 정리 자료 Archiving (참고: [GNN Study](https://cs224w-kor.github.io/posts/lec04.html) )
+    - 아카이빙을 하고 싶은 이유
+        
+        참고 링크에 남겨둔 스터디가 이전 글또 7기에서 같이 했던 그래프 스터디인데 남겨놓으니 나중에 잊어버렸을때 참고하기도 좋고, 각자 정리하면서 기억에도 더 잘 남는 것 같더라구요!
+        
+- **21Lec + 4Lab** (Lec1/2와 Lab0은 제외)
+    1. 강의를 듣고 
+    2. 돌아가면서 로테이션 강의 복습 recap 발표 - **1명**
+        1. 다른 사람들 질문/디스커션 - **외 3명 다같이**
+    
+- 주 1회 (약 16주 - 4개월 이내 완료 목표)
+
+### [Chapter I: Efficient Inference]
+
+- [x]  Lecture 3: Pruning and Sparsity (Part I) [P1]
+- [ ]  Lecture 4: Pruning and Sparsity (Part II) [P2]
+- [ ]  --- Lab 1 → 2주 분량 [P3]
+- [ ]  Lecture 5: Quantization (Part I) [P4]
+- [ ]  Lecture 6: Quantization (Part II) [P1]
+- [ ]  --- Lab 2  [P1]
+- [ ]  Lecture 7: Neural Architecture Search (Part I) [P2]
+- [ ]  Lecture 8: Neural Architecture Search (Part II) [P2]
+- [ ]  --- Lab 3
+- [ ]  Lecture 9: Knowledge Distillation [P1]
+- [ ]  Lecture 10: MCUNet: TinyML on Microcontrollers
+- [ ]  Lecture 11: TinyEngine and Parallel Processing [P2]
+
+### [Chapter II: Domain-Specific Optimization]
+
+- [ ]  Lecture 12: Transformer and LLM (Part I)
+- [ ]  Lecture 13: Transformer and LLM (Part II)
+- [ ]  Lecture 14: Vision Transformer
+- [ ]  --- Lab 4
+- [ ]  Lecture 15: GAN, Video, and Point Cloud
+- [ ]  Lecture 16: Diffusion Model
+- [ ]  Lecture 17: Distributed Training (Part I)
+- [ ]  Lecture 18: Distributed Training (Part II)
+- [ ]  --- Lab 5
+- [ ]  Lecture 19: On-Device Training and Transfer Learning
+- [ ]  Lecture 20: Efficient Fine-tuning and Prompt Engineering
+
+### [Chapter IV: Advanced Topics]
+
+- [ ]  Lecture 21: Basics of Quantum Computing
+- [ ]  Lecture 22: Quantum Machine Learning
+- [ ]  Lecture 23: Noise Robust Quantum ML

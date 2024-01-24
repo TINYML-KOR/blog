@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="who">
+<meta name="dcterms.date" content="2024-07-06">
+<meta name="description" content="Introduction - Machine Learning for Graphs">
+
+<title>TinyML KOR - Lecture 1</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">TinyML KOR</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html">
+ <span class="menu-text">Study Group</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Lecture 1</h1>
+                  <div>
+        <div class="description">
+          Introduction - Machine Learning for Graphs
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">LEC01</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>who </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">July 6, 2024</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#why-graphs" id="toc-why-graphs" class="nav-link active" data-scroll-target="#why-graphs">1.1 - Why Graphs</a></li>
+  <li><a href="#applications-of-graph-ml" id="toc-applications-of-graph-ml" class="nav-link" data-scroll-target="#applications-of-graph-ml">1.2 - Applications of Graph ML</a></li>
+  <li><a href="#choice-of-graph" id="toc-choice-of-graph" class="nav-link" data-scroll-target="#choice-of-graph">1.3 - Choice of Graph</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="why-graphs" class="level1">
+<h1>1.1 - Why Graphs</h1>
+<p><strong>그래프란?</strong></p>
+<p>⇒ a general language for describing and analyzing entities with relations/interactions</p>
+<p>⇒ 서로 관계/상호작용하는 entity들을 설명하고 분석하기 위한 언어라고 할 수 있음 (여기서 entity란 정보의 세계에서 의미있는 하나의 정보 단위)</p>
+<ul>
+<li>그래프 예시
+<ul>
+<li>event graphs</li>
+<li>computer networks</li>
+<li>disease pathways</li>
+<li>food webs</li>
+<li>particle networks</li>
+<li>underground networks</li>
+<li>social networks</li>
+<li>economic networks</li>
+<li>communication networks</li>
+<li>citation networks</li>
+<li>internet</li>
+<li>networks of neurons</li>
+<li>knowledge graphs</li>
+<li>regulatory networks</li>
+<li>scene graphs</li>
+<li>code graphs</li>
+<li>molecules</li>
+<li>3D shapes</li>
+</ul></li>
+</ul>
+<p>⇒ 그래프로 세상에 일어나는 모든 현상과 구조들을 설명할 수 있다(broadly applicable).</p>
+<p>(관심있는 분야의 현상을 그래프로 표현하여 딥러닝 모델 구조로 변환할 수 있는 능력이 있다면…)</p>
+<p>e.g) 분자 구조, 3D 이미지 모형(voxel), 먹이사슬, 소셜 네트워크 등</p>
+<p>(graph와 network의 차이?)</p>
+<p><strong>그래프에서 얻을 수 있는 정보 유형</strong></p>
+<ul>
+<li>데이터 포인트 간의 구성(organization)과 연결</li>
+<li>유사한 데이터 포인트 간의 밀접성(similarity)</li>
+<li>데이터 포인트 간의 연결들이 이루는 그래프 구조</li>
+</ul>
+<p><strong>그래프가 갖는 구조를 어떻게 활용해 나은 예측을 할 수 있을까?</strong></p>
+<p>⇒ 현상을 명시적(explicitly)으로 잘 반영한 그래프 모델링이 중요하다!</p>
+<p><strong>그래프 ML이 더 어려운 이유?</strong></p>
+<p>⇒ arbitrary size and complex topology</p>
+<p>⇒ spatial locality(공간 지역성)가 없다</p>
+<p>⇒ 이미지나 텍스트 인풋의 경우 어느 한 데이터포인트로부터 다른 데이터 포인트 간 상대적 위치가 정해져있다(e.g 상하좌우). 하지만, 그래프의 경우 축이 되는 데이터 포인트가 존재하지 않는다.</p>
+<p><strong>그래프를 사용한 딥러닝</strong></p>
+<p>⇒ 인풋으로는 그래프를 받고, 아웃풋으로는 아래와 같은 형식(ground truth도 동일한 형식)이 가능하다. &gt;</p>
+<ul>
+<li>node-level</li>
+<li>edge-level</li>
+<li>graph/subgraph generation</li>
+<li>graph/subgraph classification</li>
+</ul>
+<p><strong>그래프 딥러닝 모델에서 우리가 바라는 플로우</strong></p>
+<hr>
+<p><img src="https://imgur.com/IR2Gl9X.png" class="img-fluid"></p>
+<p>위 플로우를 거친 좋은 성능의 모델을 만들기 위해서는, 인풋이 현상을 잘 반영한 embedding vector로 변환될 수 있도록 학습하는 것이 중요하다.(Representation Learning)</p>
+<ul>
+<li>코스 과정동안 배울 그래프 방법들
+<ul>
+<li>traditional methods : graphlets, graph kernels</li>
+<li>node embeddings : DeepWalk, Node2Vec</li>
+<li>Graph Neural Networks : GCN, GraphSAGE, GAT, Theory of GNNs</li>
+<li>Knowledge graphs and reasoning : TransE, BetaE</li>
+<li>Deep Generative Models for graphs</li>
+<li>Applications</li>
+</ul></li>
+</ul>
+</section>
+<section id="applications-of-graph-ml" class="level1">
+<h1>1.2 - Applications of Graph ML</h1>
+<p>그래프 ML은 다양한 태스크 커버가 가능하다</p>
+<ol type="1">
+<li><strong>Node Level(node classification)</strong></li>
+</ol>
+<hr>
+<p>example1) protein folding (구글의 알파폴드)</p>
+<ul>
+<li>배경 : 단백질은 아미노산으로 이루어져있는데, 복잡한 3D 입체 구조의 아미노산 연결 때문에 단백질 구조를 파악하는 태스크는 많게는 1-2년까지 걸린다고 함.</li>
+<li>key idea : spatial graph
+<ul>
+<li>graph : 단백질</li>
+<li>nodes : 아미노산</li>
+<li>edges : 사슬구조</li>
+</ul></li>
+</ul>
+<ol type="1">
+<li><strong>Edge Level</strong></li>
+</ol>
+<hr>
+<p>example1) Recommender system (PinSage)</p>
+<ul>
+<li><p>nodes : users and items</p></li>
+<li><p>edges : user-item interactions</p>
+<p><img src="https://imgur.com/gallery/5h2HIFY.png" class="img-fluid"></p></li>
+</ul>
+<p>example2) drugs and side effects</p>
+<ul>
+<li>nodes : drugs &amp; proteins</li>
+<li>edges : interaction</li>
+</ul>
+<p>using 2 heterogeneous graphs(drugs &amp; proteins)</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="[](https://i.imgur.com/AEONN7T.png)" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">스크린샷 2022-07-05 오후 11.15.49.png</figcaption><p></p>
+</figure>
+</div>
+<p>⇒ drug A와 B를 함께 썼을 때, 생길 수 있는 interaction(edge)는 무엇인가?</p>
+<ol type="1">
+<li><strong>Community(subgraph) level</strong></li>
+</ol>
+<hr>
+<p>example1) Traffic Prediction</p>
+<ul>
+<li>nodes : Road Segments(도로 구간)</li>
+<li>edges : 도로 구간 교차점</li>
+</ul>
+<p><img src="https://imgur.com/gallery/MjIw0AS.png" class="img-fluid"></p>
+<p>⇒ 아웃풋 : 도착 예정 시간</p>
+<ol type="1">
+<li><strong>Graph-level prediction</strong></li>
+</ol>
+<hr>
+<p>4-1) <strong>graph classification</strong></p>
+<p>example1) drug discovery</p>
+<ul>
+<li>nodes : atoms</li>
+<li>edges : chemical bonds</li>
+<li>graph : molecules</li>
+</ul>
+<p>⇒ 노드와 에지 정보를 통해 그래프(분자) 예측</p>
+<p>4-2) <strong>Graph-level generation</strong></p>
+<p>example1) drug generation</p>
+<ul>
+<li>nodes : atoms</li>
+<li>edges : chemical bonds</li>
+<li>graph : moelcules</li>
+</ul>
+<p>⇒ 새로운 그래프(분자) 생성</p>
+<p>example2) physics simulation (graph evolution)</p>
+<ul>
+<li>nodes : particles</li>
+<li>edges : interaction between particles</li>
+</ul>
+<p>⇒ t시점 전의 정보로 t시점 이후의 그래프 생성</p>
+<p><img src="https://imgur.com/gallery/c9s2K6o.png" class="img-fluid"></p>
+</section>
+<section id="choice-of-graph" class="level1">
+<h1>1.3 - Choice of Graph</h1>
+<p><strong>그래프 구성요소</strong></p>
+<p><img src="https://imgur.com/gallery/c9s2K6o.png" class="img-fluid"></p>
+<p>objects : nodes, vertices</p>
+<p>Interactions : links, edges</p>
+<p>system : network, graph</p>
+<p>**object와 interactions로 이루어진 데이터 구조 ⇒ graph</p>
+<p>그래프로 세상에 일어나는 모든 현상과 구조들을 설명할 수 있다(broadly applicable).</p>
+<p><img src="https://imgur.com/gallery/Xmg96Y0.png" class="img-fluid"></p>
+<ul>
+<li>표현법에 따라 그래프의 활용방법은 무궁무진하다. 중요한 것은 적절한 표현을 선택하는 것.</li>
+<li>설명하고자하는 현상을 그래프로 정의하고 싶다면, 먼저 아래 두가지 질문을 하자.
+<ol type="1">
+<li>what are nodes?</li>
+<li>what are edges?</li>
+</ol></li>
+</ul>
+<p><strong>Directed vs Undirected Graphs</strong></p>
+<p><img src="https://imgur.com/gallery/DOHiiPS.png" class="img-fluid"></p>
+<p>’페이스북의 친구와 인스타그램의 팔로우’는 directed와 undirected graph를 이해하기에 좋은 예이다.</p>
+<p><strong>Node Degrees (차수)</strong></p>
+<ul>
+<li>undirected graph
+<ul>
+<li>undirected graph의 경우, node degree는 해당 노드에 연결된 에지의 총 갯수</li>
+<li>average degree는 연결된 에지의 총 갯수 곱하기 2(쌍방향 연결이기 때문)를 그래프를 이루는 전체 노드 수로 나눈 값</li>
+</ul></li>
+<li>directed graph
+<ul>
+<li>directed graph의 경우, 해당 노드로 향하는 in-degree와 해당 노드로부터 뻗어나가는 out-degree로 나눌 수 있다. node degree는 이 in-degree와 out-degree의 합.</li>
+</ul></li>
+</ul>
+<p><strong>Bipartite Graph</strong></p>
+<p><img src="https://imgur.com/gallery/6HMdMds.png" class="img-fluid"></p>
+<ul>
+<li>자주 등장하는 또다른 그래프의 종류는 bipartite graph(이분 그래프)이다.</li>
+<li>이분 그래프는 2개의 집합 U와 V의 interaction을 나타낸 그래프이다. U와 V는 서로 독립적인 집합이며, 같은 집합의 원소끼리는 연관되지 않는다. e.g) A와 B 간 연결X</li>
+<li>이분 그래프의 예로는 구매자-구매 아이템 관계 등이 있다.</li>
+</ul>
+<p><strong>Folded/Projected Bipartite Graph</strong></p>
+<ul>
+<li>Bipartite 그래프에서 집합 간의 요소들 간의 상관관계가 명시되어있다면 Folded 또는 Projected Bipartite Graph라고 부른다.</li>
+</ul>
+<p>(정보에 depth가 생긴다는 의미에서 folded라고 붙인듯하다.)</p>
+<p><img src="https://imgur.com/gallery/Ol84y3q.png" class="img-fluid"></p>
+<p><strong>Adjacency Matrix</strong></p>
+<p><img src="https://imgur.com/gallery/Ol84y3q.png" class="img-fluid"></p>
+<ul>
+<li>그래프의 노드 간 연결관계(edge)를 나타낸 매트릭스이다.</li>
+<li>각 행과 열은 노드의 번수를 의미하고, 0은 연결되지 않음, 1은 연결됨을 의미한다. 만약 3번째 행에 4번째 열이 1이라면, 3번 노드와 4번 노드는 연결되어있음을 의미한다.</li>
+<li>undirect graph라면, 주대각선을 기준으로 adj matrix는 대칭이고, directed graph라면, 대칭이 아닐 수도 있다.</li>
+<li>adjacency matrix는 컴퓨터가 그래프를 이해할 수 있는 형태이지만, 문제는 노드의 수가 수백개에서 수십만개로 늘어나고, 많은 노드들의 연결이 몇 개 없을 때, 메모리 사이즈에 비해 0인 값이 너무 많게되는 문제(sparse)가 발생한다.</li>
+</ul>
+<p><strong>Edge List</strong></p>
+<p><img src="https://imgur.com/gallery/OWW5Kd4.png" class="img-fluid"></p>
+<ul>
+<li>Edge List는 그래프를 엣지들의 리스트로 나타낸 값이다.</li>
+<li>서로 연결된 노드를 짝지어 리스트에 배열한다.</li>
+<li>그래프가 크고 sparse할 때 유용하다.</li>
+</ul>
+<p><strong>Node and Edge Attributes</strong></p>
+<p>⇒ 노드와 엣지로 나타낼 수 있는 값들은 어떤 것들이 있을까?</p>
+<p>⇒ 그래프에서 어떤 정보들을 얻을 수 있을까?</p>
+<ul>
+<li><p>weight (e.g., frequency of communication)</p>
+<ul>
+<li>엣지가 0과 1 이외의 값을 갖는다면?</li>
+</ul>
+<p><img src="https://imgur.com/gallery/LkoQdhF.png" class="img-fluid"></p></li>
+<li><p>ranking (best friend, second best friend, …)</p></li>
+<li><p>type (friend, relative, co-worker)</p></li>
+<li><p>sign (+ / - )</p></li>
+<li><p>properties depending on the structure of the rest of the graph : Number of common friends</p></li>
+</ul>
+<p><strong>More Types of Graphs</strong></p>
+<ul>
+<li>Connected(undirected) graph</li>
+</ul>
+<p><img src="https://imgur.com/gallery/vsXc3yq.png" class="img-fluid"></p>
+<p>**연결이 부분적으로만 되어 있어도, 그래프는 adjacency matrix에 표현 가능하다.</p>
+<p><img src="https://imgur.com/gallery/rsKz6Rt.png" class="img-fluid"></p>
+<p><strong>Connectivity of Driected Graphs</strong></p>
+<ul>
+<li><p>Strongly connected directed graph</p>
+<ul>
+<li>모든 노드들이 다른 모든 노드들로 방향 상관없이 다다르는 path가 항상 있다면, strongly connected directed graph이다.</li>
+</ul></li>
+<li><p>Weakly connected directed graph</p>
+<ul>
+<li>에지 방향을 무시했을 때, 노드 간 전부 연결되어있다면, weakly connected directed graph이다.</li>
+</ul></li>
+<li><p>Strongly connected components(SCC)</p>
+<p><img src="https://imgur.com/gallery/AEONN7T.png" class="img-fluid"></p>
+<ul>
+<li>그래프에 속한 다른 노드들 전부는 아니지만, 해당 그룹 간의 연결이 한 노드에서 다른 노드로 항상 도달할 수 있다면(strong connection)한다면, 그 그룹을 strongly connected components라고 지칭한다.</li>
+</ul></li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

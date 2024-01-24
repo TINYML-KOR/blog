@@ -1,7 +1,9 @@
 ---
 title: "Study Archive"
 listing:
-  contents: posts
+  contents: 
+    - "posts/lecs/*.qmd"
+    - "posts/labs/*.ipynb"
   sort: "date desc"
   type: default
   categories: true
