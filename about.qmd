@@ -3,17 +3,16 @@ title: "TinyML Study Group"
 image: TinyML.png
 page-layout: full
 about:
-  template: solana
+  template: trestles
   links:
     - icon: github
       text: Github
       href: https://github.com/TINYML-KOR
 ---
 
-@Gueltto9th
+@[Gueltto9th](https://github.com/orgs/geultto/teams/9th)
 
 # Group Members
-
 - [Jung Yeon Lee](https://github.com/curieuxjy)
 - [Seunghyun Oh](https://github.com/ooshyun)
 - [castleflag](https://github.com/CastleFlag)
