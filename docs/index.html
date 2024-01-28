@@ -70,9 +70,9 @@ ul.task-list li input[type="checkbox"] {
     }
 
     const options = {
-      valueNames: ['listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      valueNames: ['listing-date','listing-title','listing-author','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
       
-      searchColumns: ["listing-categories"],
+      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description","listing-categories"],
     };
 
     window['quarto-listings'] = window['quarto-listings'] || {};
@@ -113,7 +113,7 @@ ul.task-list li input[type="checkbox"] {
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
     <a class="nav-link" href="./about.html">
- <span class="menu-text">Study Group</span></a>
+ <span class="menu-text">TinyML Study Group</span></a>
   </li>  
   <li class="nav-item compact">
     <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
@@ -148,7 +148,7 @@ ul.task-list li input[type="checkbox"] {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(0)</span></div></div></div>
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(2)</span></div><div class="category" data-category="basic">basic <span class="quarto-category-count">(1)</span></div><div class="category" data-category="lab">lab <span class="quarto-category-count">(1)</span></div><div class="category" data-category="lec">lec <span class="quarto-category-count">(1)</span></div><div class="category" data-category="pruning">pruning <span class="quarto-category-count">(1)</span></div><div class="category" data-category="pytorch">pytorch <span class="quarto-category-count">(1)</span></div></div></div>
 <!-- main -->
 <main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
 
@@ -161,7 +161,89 @@ ul.task-list li input[type="checkbox"] {
 
 <div class="quarto-listing quarto-listing-container-default" id="listing-listing">
 <div class="list quarto-listing-default">
+<div class="quarto-post image-right" data-index="0" data-categories="lab,pytorch,basic" data-listing-date-sort="1704898800000" data-listing-file-modified-sort="1706478023490" data-listing-reading-time-sort="1.88">
+<div class="thumbnail">
+<a href="./posts/labs/lab00.html">
+<div class="thumbnail-image">
 
+</div>
+</a><p><a href="./posts/labs/lab00.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/labs/lab00.html">
+<h3 class="no-anchor listing-title">
+👩‍💻 Lab 0
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('lab'); return false;">
+lab
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('pytorch'); return false;">
+pytorch
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('basic'); return false;">
+basic
+</div>
+</div>
+<a href="./posts/labs/lab00.html">
+<div class="listing-description">
+<p>PyTorch Tutorial</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/labs/lab00.html">
+<div class="listing-date">
+Jan 11, 2024
+</div>
+<div class="listing-author">
+Jung Yeon Lee
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="1" data-categories="pruning,lec" data-listing-date-sort="1704466800000" data-listing-file-modified-sort="1706478306390" data-listing-reading-time-sort="0.22">
+<div class="thumbnail">
+<p><a href="./posts/lecs/lec03.html"> <img src="./images/lec03/result.png" class="thumnail-image"> </a></p>
+</div>
+<div class="body">
+<a href="./posts/lecs/lec03.html">
+<h3 class="no-anchor listing-title">
+🧑‍🏫 Lecture 3
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('pruning'); return false;">
+pruning
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('lec'); return false;">
+lec
+</div>
+</div>
+<a href="./posts/lecs/lec03.html">
+<div class="listing-description">
+<p>Introduction - Machine Learning for Graphs</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/lecs/lec03.html">
+<div class="listing-date">
+Jan 6, 2024
+</div>
+<div class="listing-author">
+who
+</div>
+</a>
+</div>
+</div>
 </div>
 <div class="listing-no-matching d-none">
 No matching items

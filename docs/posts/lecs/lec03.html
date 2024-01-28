@@ -7,10 +7,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="who">
-<meta name="dcterms.date" content="2024-07-06">
+<meta name="dcterms.date" content="2024-01-06">
 <meta name="description" content="Introduction - Machine Learning for Graphs">
 
-<title>TinyML KOR - Lecture 1</title>
+<title>TinyML KOR - 🧑‍🏫 Lecture 3</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -26,22 +26,22 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../">
-<script src="../site_libs/quarto-html/quarto.js"></script>
-<script src="../site_libs/quarto-html/popper.min.js"></script>
-<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -63,7 +63,7 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
-<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../../styles.css">
 </head>
 
 <body class="nav-fixed">
@@ -73,7 +73,7 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container">
-    <a class="navbar-brand" href="../index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">TinyML KOR</span>
     </a>
   </div>
@@ -83,8 +83,8 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../about.html">
- <span class="menu-text">Study Group</span></a>
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">TinyML Study Group</span></a>
   </li>  
   <li class="nav-item compact">
     <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
@@ -98,43 +98,7 @@ ul.task-list li input[type="checkbox"] {
     </nav>
 </header>
 <!-- content -->
-<header id="title-block-header" class="quarto-title-block default page-columns page-full">
-  <div class="quarto-title-banner page-columns page-full">
-    <div class="quarto-title column-body">
-      <h1 class="title">Lecture 1</h1>
-                  <div>
-        <div class="description">
-          Introduction - Machine Learning for Graphs
-        </div>
-      </div>
-                          <div class="quarto-categories">
-                <div class="quarto-category">LEC01</div>
-              </div>
-                  </div>
-  </div>
-    
-  
-  <div class="quarto-title-meta">
-
-      <div>
-      <div class="quarto-title-meta-heading">Author</div>
-      <div class="quarto-title-meta-contents">
-               <p>who </p>
-            </div>
-    </div>
-      
-      <div>
-      <div class="quarto-title-meta-heading">Published</div>
-      <div class="quarto-title-meta-contents">
-        <p class="date">July 6, 2024</p>
-      </div>
-    </div>
-    
-      
-    </div>
-    
-  
-  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
@@ -142,20 +106,85 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#강의-3" id="toc-강의-3" class="nav-link active" data-scroll-target="#강의-3">강의 3</a></li>
+  <li><a href="#lecture-3" id="toc-lecture-3" class="nav-link active" data-scroll-target="#lecture-3"><span class="toc-section-number">1</span>  Lecture 3</a>
+  <ul class="collapse">
+  <li><a href="#section-numbering은-number-sections로-끄고-킬-수-있습니다." id="toc-section-numbering은-number-sections로-끄고-킬-수-있습니다." class="nav-link" data-scroll-target="#section-numbering은-number-sections로-끄고-킬-수-있습니다."><span class="toc-section-number">1.1</span>  Section numbering은 <code>number-sections</code>로 끄고 킬 수 있습니다.</a>
+  <ul class="collapse">
+  <li><a href="#우선-편하게-작성해주시고-몇가지-통일해야할-것들은-나중에-정리하는-걸로-할게요" id="toc-우선-편하게-작성해주시고-몇가지-통일해야할-것들은-나중에-정리하는-걸로-할게요" class="nav-link" data-scroll-target="#우선-편하게-작성해주시고-몇가지-통일해야할-것들은-나중에-정리하는-걸로-할게요"><span class="toc-section-number">1.1.1</span>  우선 편하게 작성해주시고 몇가지 통일해야할 것들은 나중에 정리하는 걸로 할게요 :)</a></li>
+  <li><a href="#author만-about-페이지에-있는-jung-yeon-leeseunghyun-ohcastleflag-중에-골라서-써주세요" id="toc-author만-about-페이지에-있는-jung-yeon-leeseunghyun-ohcastleflag-중에-골라서-써주세요" class="nav-link" data-scroll-target="#author만-about-페이지에-있는-jung-yeon-leeseunghyun-ohcastleflag-중에-골라서-써주세요"><span class="toc-section-number">1.1.2</span>  Author만 about 페이지에 있는 <code>Jung Yeon Lee/Seunghyun Oh/castleflag</code> 중에 골라서 써주세요~</a></li>
+  </ul></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content quarto-banner-title-block" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">🧑‍🏫 Lecture 3</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">pruning</div>
+    <div class="quarto-category">lec</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Introduction - Machine Learning for Graphs
+  </div>
+</div>
 
 
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>who </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">January 6, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="lecture-3" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Lecture 3</h1>
+<section id="section-numbering은-number-sections로-끄고-킬-수-있습니다." class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="section-numbering은-number-sections로-끄고-킬-수-있습니다."><span class="header-section-number">1.1</span> Section numbering은 <code>number-sections</code>로 끄고 킬 수 있습니다.</h2>
+<section id="우선-편하게-작성해주시고-몇가지-통일해야할-것들은-나중에-정리하는-걸로-할게요" class="level3" data-number="1.1.1">
+<h3 data-number="1.1.1" class="anchored" data-anchor-id="우선-편하게-작성해주시고-몇가지-통일해야할-것들은-나중에-정리하는-걸로-할게요"><span class="header-section-number">1.1.1</span> 우선 편하게 작성해주시고 몇가지 통일해야할 것들은 나중에 정리하는 걸로 할게요 :)</h3>
+</section>
+<section id="author만-about-페이지에-있는-jung-yeon-leeseunghyun-ohcastleflag-중에-골라서-써주세요" class="level3" data-number="1.1.2">
+<h3 data-number="1.1.2" class="anchored" data-anchor-id="author만-about-페이지에-있는-jung-yeon-leeseunghyun-ohcastleflag-중에-골라서-써주세요"><span class="header-section-number">1.1.2</span> Author만 about 페이지에 있는 <code>Jung Yeon Lee/Seunghyun Oh/castleflag</code> 중에 골라서 써주세요~</h3>
+<hr>
+<p>이미지는 Typora 이미지 경로 설정하면 바로 넣을 수 있습니다!</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec03/result.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">result</figcaption><p></p>
+</figure>
+</div>
+<hr>
+<p>이미지 크기 조절은</p>
+<pre><code>&lt;center&gt;
+&lt;img src="../../images/이미지_이름.png" width="50%" /&gt;
+&lt;figcaption&gt;이미지 캡션&lt;/figcaption&gt;
+&lt;/center&gt;</code></pre>
 
 
-<section id="강의-3" class="level1">
-<h1>강의 3</h1>
-
-
+</section>
+</section>
 </section>
 
 </main> <!-- /main -->

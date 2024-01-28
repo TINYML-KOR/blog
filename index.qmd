@@ -1,9 +1,7 @@
 ---
 title: "Study Archive"
 listing:
-  contents: 
-    - "posts/lecs/*.qmd"
-    - "posts/labs/*.ipynb"
+  contents: "posts"
   sort: "date desc"
   type: default
   categories: true
@@ -12,5 +10,3 @@ listing:
 page-layout: full
 title-block-banner: true
 ---
-
-

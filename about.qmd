@@ -1,20 +1,68 @@
 ---
-title: "Study Group"
+title: "TinyML Study Group"
 image: TinyML.png
+page-layout: full
 about:
-  template: jolla
+  template: solana
   links:
     - icon: github
       text: Github
       href: https://github.com/TINYML-KOR
-
 ---
 
 @Gueltto9th
 
 # Group Members
 
-- []()
-- []()
-- []()
-- []()
+- [Jung Yeon Lee](https://github.com/curieuxjy)
+- [Seunghyun Oh](https://github.com/ooshyun)
+- [castleflag](https://github.com/CastleFlag)
+
+### **MIT 6.5940 Fall 2023 TinyML and Efficient Deep Learning Computing**
+강의 사이트: [https://hanlab.mit.edu/courses/2023-fall-65940](https://hanlab.mit.edu/courses/2023-fall-65940)
+
+- 목표: 강의 영상 리뷰 및 Lab 실습 완료
+    - Github 정리 자료 Archiving (참고: [GNN Study](https://cs224w-kor.github.io/posts/lec04.html))
+
+- 참고강의: **ECE 5545: Machine Learning Hardware and Systems** 
+  - [https://abdelfattah-class.github.io/ece5545/sp23](https://abdelfattah-class.github.io/ece5545/sp23)
+        
+## **21Lec + 4Lab** 
+- Lec1/2와 Lab0은 제외
+- 강의를 듣고 1명씩 돌아가면서 강의 복습 recap 발표
+- 다른 사람들은 질문/디스커션 토픽 가져오기
+- 주 1회 (약 16주 - 4개월 이내 완료 목표)
+
+---
+
+### **[Chapter I: Efficient Inference]**
+- [x]  Lecture 3: Pruning and Sparsity (Part I) [P1]
+- [ ]  Lecture 4: Pruning and Sparsity (Part II) [P2]
+- [ ]  --- Lab 1 → 2주 분량 [P3]
+- [ ]  Lecture 5: Quantization (Part I) [P1]
+- [ ]  Lecture 6: Quantization (Part II) [P2]
+- [ ]  --- Lab 2  [P3]
+- [ ]  Lecture 7: Neural Architecture Search (Part I) [P1]
+- [ ]  Lecture 8: Neural Architecture Search (Part II) [P2]
+- [ ]  --- Lab 3 [P3]
+- [ ]  Lecture 9: Knowledge Distillation [P1]
+- [ ]  Lecture 10: MCUNet: TinyML on Microcontrollers
+- [ ]  Lecture 11: TinyEngine and Parallel Processing [P2]
+
+### **[Chapter II: Domain-Specific Optimization]**
+- [ ]  Lecture 12: Transformer and LLM (Part I)
+- [ ]  Lecture 13: Transformer and LLM (Part II)
+- [ ]  Lecture 14: Vision Transformer
+- [ ]  --- Lab 4
+- [ ]  Lecture 15: GAN, Video, and Point Cloud
+- [ ]  Lecture 16: Diffusion Model
+- [ ]  Lecture 17: Distributed Training (Part I)
+- [ ]  Lecture 18: Distributed Training (Part II)
+- [ ]  --- Lab 5
+- [ ]  Lecture 19: On-Device Training and Transfer Learning
+- [ ]  Lecture 20: Efficient Fine-tuning and Prompt Engineering
+
+### **[Chapter IV: Advanced Topics]**
+- [ ]  Lecture 21: Basics of Quantum Computing
+- [ ]  Lecture 22: Quantum Machine Learning
+- [ ]  Lecture 23: Noise Robust Quantum ML

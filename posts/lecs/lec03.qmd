@@ -1,0 +1,49 @@
+---
+toc: true
+number-sections: true
+title: "🧑‍🏫 Lecture 3"
+description: Introduction - Machine Learning for Graphs
+author: "who"
+date: "2024-01-06"
+categories: [pruning, lec]
+---
+
+# Lecture 3
+
+## Section numbering은 `number-sections`로 끄고 킬 수 있습니다.
+
+### 우선 편하게 작성해주시고 몇가지 통일해야할 것들은 나중에 정리하는 걸로 할게요 :)
+
+### Author만 about 페이지에 있는 `Jung Yeon Lee/Seunghyun Oh/castleflag` 중에 골라서 써주세요~
+
+
+
+---
+
+
+
+이미지는 Typora 이미지 경로 설정하면 바로 넣을 수 있습니다!
+
+![result](../../images/lec03/result.png)
+
+
+
+
+
+
+
+---
+
+
+
+이미지 크기 조절은
+
+
+
+```
+<center>
+<img src="../../images/이미지_이름.png" width="50%" />
+<figcaption>이미지 캡션</figcaption>
+</center>
+```
+
