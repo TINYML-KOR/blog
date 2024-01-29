@@ -2,13 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.335">
+<meta name="generator" content="quarto-1.4.549">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="who">
-<meta name="dcterms.date" content="2024-01-06">
-<meta name="description" content="Introduction - Machine Learning for Graphs">
+<meta name="author" content="Seunghyun Oh">
+<meta name="dcterms.date" content="2024-01-28">
+<meta name="description" content="Pruning and Sparsity (Part I)">
 
 <title>TinyML KOR - 🧑‍🏫 Lecture 3</title>
 <style>
@@ -20,8 +20,42 @@ div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
   width: 0.8em;
-  margin: 0 0.8em 0.2em -1.6em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -48,7 +82,13 @@ ul.task-list li input[type="checkbox"] {
   "collapse-after": 3,
   "panel-placement": "end",
   "type": "overlay",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -57,11 +97,42 @@ ul.task-list li input[type="checkbox"] {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
-    "search-submit-button-title": "Submit"
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
   }
 }</script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -70,30 +141,32 @@ ul.task-list li input[type="checkbox"] {
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg navbar-dark ">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container">
+      <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">TinyML KOR</span>
     </a>
   </div>
+            <div id="quarto-search" class="" title="Search"></div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../about.html">
- <span class="menu-text">TinyML Study Group</span></a>
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">TinyML Study Group</span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/"> <i class="bi bi-github" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
 </ul>
-              <div id="quarto-search" class="" title="Search"></div>
           </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -106,14 +179,19 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#lecture-3" id="toc-lecture-3" class="nav-link active" data-scroll-target="#lecture-3"><span class="toc-section-number">1</span>  Lecture 3</a>
+  <li><a href="#introduction-to-pruning" id="toc-introduction-to-pruning" class="nav-link active" data-scroll-target="#introduction-to-pruning">1. Introduction to Pruning</a></li>
+  <li><a href="#determine-the-pruning-granularity" id="toc-determine-the-pruning-granularity" class="nav-link" data-scroll-target="#determine-the-pruning-granularity">2. Determine the Pruning Granularity</a>
   <ul class="collapse">
-  <li><a href="#section-numbering은-number-sections로-끄고-킬-수-있습니다." id="toc-section-numbering은-number-sections로-끄고-킬-수-있습니다." class="nav-link" data-scroll-target="#section-numbering은-number-sections로-끄고-킬-수-있습니다."><span class="toc-section-number">1.1</span>  Section numbering은 <code>number-sections</code>로 끄고 킬 수 있습니다.</a>
+  <li><a href="#pattern-based-pruning" id="toc-pattern-based-pruning" class="nav-link" data-scroll-target="#pattern-based-pruning">2.1 Pattern-based Pruning</a></li>
+  <li><a href="#channel-level-pruning" id="toc-channel-level-pruning" class="nav-link" data-scroll-target="#channel-level-pruning">2.2 Channel-level Pruning</a></li>
+  </ul></li>
+  <li><a href="#determine-the-pruning-criterion" id="toc-determine-the-pruning-criterion" class="nav-link" data-scroll-target="#determine-the-pruning-criterion">3. Determine the Pruning Criterion</a>
   <ul class="collapse">
-  <li><a href="#우선-편하게-작성해주시고-몇가지-통일해야할-것들은-나중에-정리하는-걸로-할게요" id="toc-우선-편하게-작성해주시고-몇가지-통일해야할-것들은-나중에-정리하는-걸로-할게요" class="nav-link" data-scroll-target="#우선-편하게-작성해주시고-몇가지-통일해야할-것들은-나중에-정리하는-걸로-할게요"><span class="toc-section-number">1.1.1</span>  우선 편하게 작성해주시고 몇가지 통일해야할 것들은 나중에 정리하는 걸로 할게요 :)</a></li>
-  <li><a href="#author만-about-페이지에-있는-jung-yeon-leeseunghyun-ohcastleflag-중에-골라서-써주세요" id="toc-author만-about-페이지에-있는-jung-yeon-leeseunghyun-ohcastleflag-중에-골라서-써주세요" class="nav-link" data-scroll-target="#author만-about-페이지에-있는-jung-yeon-leeseunghyun-ohcastleflag-중에-골라서-써주세요"><span class="toc-section-number">1.1.2</span>  Author만 about 페이지에 있는 <code>Jung Yeon Lee/Seunghyun Oh/castleflag</code> 중에 골라서 써주세요~</a></li>
+  <li><a href="#select-of-synapses" id="toc-select-of-synapses" class="nav-link" data-scroll-target="#select-of-synapses">3.1 <strong>Select of Synapses</strong></a></li>
+  <li><a href="#select-of-neurons" id="toc-select-of-neurons" class="nav-link" data-scroll-target="#select-of-neurons">3.2 <strong>Select of Neurons</strong></a></li>
   </ul></li>
-  </ul></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">4. Discussion</a></li>
+  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference">5. Reference</a></li>
   </ul>
 </nav>
     </div>
@@ -124,14 +202,14 @@ ul.task-list li input[type="checkbox"] {
 <div class="quarto-title">
 <h1 class="title">🧑‍🏫 Lecture 3</h1>
   <div class="quarto-categories">
-    <div class="quarto-category">pruning</div>
-    <div class="quarto-category">lec</div>
+    <div class="quarto-category">TinyML</div>
+    <div class="quarto-category">EdgeAI</div>
   </div>
   </div>
 
 <div>
   <div class="description">
-    Introduction - Machine Learning for Graphs
+    Pruning and Sparsity (Part I)
   </div>
 </div>
 
@@ -141,14 +219,14 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>who </p>
+             <p>Seunghyun Oh </p>
           </div>
   </div>
     
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">January 6, 2024</p>
+      <p class="date">January 28, 2024</p>
     </div>
   </div>
   
@@ -156,35 +234,410 @@ ul.task-list li input[type="checkbox"] {
   </div>
   
 
+
 </header>
 
-<section id="lecture-3" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> Lecture 3</h1>
-<section id="section-numbering은-number-sections로-끄고-킬-수-있습니다." class="level2" data-number="1.1">
-<h2 data-number="1.1" class="anchored" data-anchor-id="section-numbering은-number-sections로-끄고-킬-수-있습니다."><span class="header-section-number">1.1</span> Section numbering은 <code>number-sections</code>로 끄고 킬 수 있습니다.</h2>
-<section id="우선-편하게-작성해주시고-몇가지-통일해야할-것들은-나중에-정리하는-걸로-할게요" class="level3" data-number="1.1.1">
-<h3 data-number="1.1.1" class="anchored" data-anchor-id="우선-편하게-작성해주시고-몇가지-통일해야할-것들은-나중에-정리하는-걸로-할게요"><span class="header-section-number">1.1.1</span> 우선 편하게 작성해주시고 몇가지 통일해야할 것들은 나중에 정리하는 걸로 할게요 :)</h3>
-</section>
-<section id="author만-about-페이지에-있는-jung-yeon-leeseunghyun-ohcastleflag-중에-골라서-써주세요" class="level3" data-number="1.1.2">
-<h3 data-number="1.1.2" class="anchored" data-anchor-id="author만-about-페이지에-있는-jung-yeon-leeseunghyun-ohcastleflag-중에-골라서-써주세요"><span class="header-section-number">1.1.2</span> Author만 about 페이지에 있는 <code>Jung Yeon Lee/Seunghyun Oh/castleflag</code> 중에 골라서 써주세요~</h3>
-<hr>
-<p>이미지는 Typora 이미지 경로 설정하면 바로 넣을 수 있습니다!</p>
+
+<style>
+p {
+  line-height: 2; /* Adjust the line-height property as needed */
+  text-align: justify;
+  text-justify: inter-word; /* Adjust the justification mode as needed */
+}
+
+.image-container {
+  text-align: center; /* Center-align the contents horizontally */
+}
+
+.centered-text {
+  text-align: center; /* Center-align the text within the container */
+}
+</style>
+<p>앞으로 총 5장에 걸쳐서 딥러닝 모델 경량화 기법들에 대해서 소개하려고 한다. 경량화 기법으로는 Pruning, Quantization, Neural Network Architecture Search, Knowledge Distillation, 그리고 Tiny Engine에서 돌리기 위한 방법을 진행할 예정인데 본 내용은 <strong>MIT에서 Song Han 교수님이 Fall 2022에 한 강의 TinyML and Efficient Deep Learning Computing 6.S965</strong>를 바탕으로 재정리한 내용이다. 강의 자료와 영상은 이 <a href="https://efficientml.ai">링크</a>를 참조하자!</p>
+<p>첫 번째 내용으로 <strong>“가지치기”</strong>라는 의미를 가진 <strong>Pruning</strong>에 대해서 이야기, 시작!</p>
+<section id="introduction-to-pruning" class="level2">
+<h2 class="anchored" data-anchor-id="introduction-to-pruning">1. Introduction to Pruning</h2>
+<p><strong>Pruning</strong>이란 의미처럼 Neural Network에서 매개변수(노드)를 제거하는 방법입니다. 이는 Dropout하고 비슷한 의미로 볼 수 있는데, Dropout의 경우 모델 훈련 도중 랜덤적으로 특정 노드를 제외시키고 훈련시켜 모델의 Robustness를 높이는 방법으로 훈련을 하고나서도 모델의 노드는 그대로 유지가 된다. 반면 Pruning의 경우 훈련을 마친 후에, 특정 Threshold 이하의 매개변수(노드)의 경우 시 Neural Network에서 제외시켜 모델의 크기를 줄이면서 동시에 추론 속도 또한 높일 수 있다.</p>
+<p><span class="math display">\[
+\underset{W_p}{argmin}\ L(x;W_p), \text{ subject to } \lvert\lvert W_p\lvert\lvert_0\ &lt; N
+\]</span></p>
+<ul>
+<li><strong>L represents the objective function for neural network training</strong></li>
+<li><span class="math inline">\(x\)</span> is input<strong>, <span class="math inline">\(W\)</span></strong> is original weights<strong>, <span class="math inline">\(W_p\)</span></strong> is pruned weights</li>
+<li><span class="math inline">\(\lvert\lvert W_p\lvert\lvert_0\)</span> calcuates the #nonzeros in <span class="math inline">\(W_p\)</span> and <span class="math inline">\(N\)</span> is the target #nonzeros</li>
+</ul>
+<p>이는 위와 같은 식으로 표현할 수 있다. 특정 W 의 경우 0 으로 만들어 노드를 없애는 경우라고 볼 수 있겠습니다. 그렇게 Pruning한 Neural Network는 아래 그림 처럼 된다.</p>
+<div style="text-align: center;">
+<img src="../../images/lec03/Untitled.png" class="img-fluid">
+<p style="text-align: center;">
+Reference. MIT-TinyML-lecture03-Pruning-1
+</p>
+</div>
+<p>그럼 왜 Pruning을 하는 걸까? 강의에서 Pruning을 사용하면 Latency, Memeory와 같은 리소스를 확보할 수 있다고 관련된 아래같은 연구결과를 같이 보여준다.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="../../images/lec03/result.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">result</figcaption><p></p>
+<p><img src="../../images/lec03/Untitled 1.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. MIT-TinyML-lecture03-Pruning-1</figcaption>
 </figure>
 </div>
-<hr>
-<p>이미지 크기 조절은</p>
-<pre><code>&lt;center&gt;
-&lt;img src="../../images/이미지_이름.png" width="50%" /&gt;
-&lt;figcaption&gt;이미지 캡션&lt;/figcaption&gt;
-&lt;/center&gt;</code></pre>
-
-
+<p>Song Han 교수님은 Vision 딥러닝 모델 경량화 연구를 주로하셔서, CNN을 기반으로 한 모델을 예시로 보여주신다. 모두 Pruning이후에 모델 사이즈의 경우 최대 12배 줄어 들며 연산의 경우 6.3배까지 줄어 든 것을 볼 수 다.</p>
+<p>그렇다면 저렇게 “<strong>크기가 줄어든 모델이 성능을 유지할 수 있을까?“</strong></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec03/Untitled 2.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. MIT-TinyML-lecture03-Pruning-1</figcaption>
+</figure>
+</div>
+<p>그래프에서 모델의 Weight 분포도를 위 그림에서 보면, Pruning을 하고 난 이후에 Weight 분포도의 중심에 파라미터가 잘려나간 게 보인다. 이후 Fine Tuning을 하고 난 다음의 분포가 나와 있는데, 어느 정도 정확도는 떨어지지만 성능이 유지되는 걸 관찰할 수 있다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec03/Untitled 3.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. MIT-TinyML-lecture03-Pruning-1</figcaption>
+</figure>
+</div>
+<p>그런 Fine tuning을 반복적으로 하게 된다면(Iterative Pruning and Fine tuning) 그래프에서는 최대 90프로 이상의 파라미터를 덜어낼 수 있다고 한다.</p>
+<p>물론 특정 모델에서, 특정 Task를 대상으로 한 것이라 일반화할 수는 없지만 <strong>리소스를 고려하는 상황</strong>이라면 충분히 시도해볼 만한 가치가 있어 보인다. 그럼 이렇게 성능을 유지하면서 Pruning을 하기 위해서 어떤 요소를 고려해야 할지 더 자세히 이야기해보자!</p>
+<p>소개하는 고려요소는 아래와 같다. Pruning 패턴부터 차례대로 시작!</p>
+<ul>
+<li>Pruning Granularity → Pruning 패턴</li>
+<li>Pruning Criterion → 얼마만큼에 파라미터를 Pruning 할 건가?</li>
+<li>Pruning Ratio → 전체 파라미터에서 Pruning을 얼마만큼의 비율로?</li>
+<li>Fine Turning → Pruning 이후에 어떻게 Fine-Tuning 할 건가?</li>
+<li>ADMM → Pruning 이후, 어떻게 Convex가 된다고 할 수 있지?</li>
+<li>Lottery Ticket Hypothesis → Training부터 Pruning까지 모델을 만들어 보자!</li>
+<li>System Support → 하드웨어나 소프트웨어적으로 Pruning을 지원하는 경우는?</li>
+</ul>
+</section>
+<section id="determine-the-pruning-granularity" class="level2">
+<h2 class="anchored" data-anchor-id="determine-the-pruning-granularity">2. Determine the Pruning Granularity</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec03/Untitled 4.png" class="img-fluid figure-img"></p>
+<figcaption>The case of convolutional layers, red box is preserved and white one is pruned referred from MIT-TinyML-lecture03-Pruning-1</figcaption>
+</figure>
+</div>
+<p>여기서 고려요소는 “얼마만큼 뉴런을 그룹화하여 고려할 것인가?” 입니다. Regular한 정로도 분류하면서 Irregular한 경우와 Regular한 경우의 특징을 아래처럼 말합니다.</p>
+<ul>
+<li>Fine-grained/Unstructured
+<ul>
+<li>More flexible pruning index choice</li>
+<li>Hard to accelerate (irregular data expression)</li>
+<li>Can deliver speed up on some custom hardware</li>
+</ul></li>
+<li>Coarse-grained/Structured
+<ul>
+<li>Less flexible pruning index choice (a subset of the fine-grained case)</li>
+<li>Easy to accelerate</li>
+</ul></li>
+</ul>
+<p>Pruning을 한다고 모델 출력이 나오는 시간이 짧아지는 것이 아님도 언급합니다. Hardware Acceleration의 가능도가 있는데, 이 특징을 보면 알 수 있듯, Pruning의 자유도와 Hardware Acceleration이 trade-off, <strong>즉 경량화 정도와 Latency사이에 trade-off</strong> 가 있을 것이 예측됩니다. 하나씩, 자료를 보면서 살펴 보겠습니다.</p>
+<section id="pattern-based-pruning" class="level3">
+<h3 class="anchored" data-anchor-id="pattern-based-pruning">2.1 Pattern-based Pruning</h3>
+<p>Irregular에서도 Pattern-based Pruning은 <strong>연속적인 뉴런 M개 중 N개를 Pruning 하는 방법이다</strong>. 일반적으로는 N:M = 2:4 으로 한다고 소개한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec03/Untitled 5.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. Accelerating Inference with Sparsity Using the NVIDIA Ampere Architecture and NVIDIA TensorRT</figcaption>
+</figure>
+</div>
+<p>Reference. Accelerating Inference with Sparsity Using the NVIDIA Ampere Architecture and NVIDIA TensorRT</p>
+<p>예시를 들어 보면, 위와 같은 Matrix에서 행을 보시면 8개의 Weight중 4개가 Non-zero인 것을 볼 수 있습니다. 여기서 Zero인 부분을 없애고 2bit index로 하여 Matrix 연산을 하면 Nvidia’s Ampere GPU에서 속도를 2배까지 높일 수 있다고 한다. 여기서 <strong>Sparsity</strong>는 “얼마만큼 경량화 됐는지?” 이라고 생각하면 된다.</p>
+<ul>
+<li><strong>N:M sparsity</strong> means that in each <strong>contiguous M elements</strong>, <strong>N of them is pruned</strong></li>
+<li>A classic case is 2:4 sparsity (50% sparsity)</li>
+<li>It is supported by Nvidia’s Ampere GPU Architecture, which delivers up to 2x speed up and usually maintains accuracy.</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec03/Untitled 6.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. <a href="https://developer.nvidia.com/blog/accelerating-inference-with-sparsity-using-ampere-and-tensorrt/">https://developer.nvidia.com/blog/accelerating-inference-with-sparsity-using-ampere-and-tensorrt/</a></figcaption>
+</figure>
+</div>
+</section>
+<section id="channel-level-pruning" class="level3">
+<h3 class="anchored" data-anchor-id="channel-level-pruning">2.2 Channel-level Pruning</h3>
+<p>반대로 패턴이 상대적으로 regular 한 쪽인 Channel-level Pruning은 추론시간을 줄일 수 있는 반면에 경량화 비율이 적다고 말한다. 아래 그림을 보시면 Layer마다 Sparsity가 다른 걸 보실 수 있다.</p>
+<ul>
+<li>Pro: Direct speed up!</li>
+<li>Con: smaller compression ratio</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec03/Untitled 7.png" class="img-fluid figure-img"></p>
+<figcaption>Reference AMC: Automl for Model Compression and Acceleration on Mobile Devices [He&nbsp;<em>et al.</em>, ECCV 2018]</figcaption>
+</figure>
+</div>
+<p>아래에 자료에서는 Channel 별로 한 Pruning의 경우 전체 뉴련을 가지고 한 Pruning보다 추론 시간을 더 줄일 수 있다고 말한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec03/Untitled 8.png" class="img-fluid figure-img"></p>
+<figcaption>Reference AMC: Automl for Model Compression and Acceleration on Mobile Devices [He&nbsp;<em>et al.</em>, ECCV 2018]</figcaption>
+</figure>
+</div>
+<p>자료를 보면 <strong>Sparsity에서는 패턴화 돼 있으면</strong> <strong>가속화</strong>가 용이해 <strong>Latency, 추론 시간</strong>을 줄일 수 있지만 그 만큼 Pruning하는 뉴런의 수가 적어 경량화 비율이 줄 것으로 보인다. 하지만 <strong>비교적 불규칙한 쪽에 속하는 Pattern-based Pruning의 경우</strong>가 <strong>하드웨어에서 지원</strong>해주는 경우, <strong>모델 크기와 Latency를 둘 다</strong> 최적으로 잡을 수 있을 것으로 보인다.</p>
 </section>
 </section>
+<section id="determine-the-pruning-criterion" class="level2">
+<h2 class="anchored" data-anchor-id="determine-the-pruning-criterion">3. Determine the Pruning Criterion</h2>
+<p>그렇다면 어떤 파라미터를 가지는 뉴런을 우리는 잘라내야 할까요? Synapse와 Neuron으로 나눠서 살펴보자.</p>
+<ul>
+<li>Which synapses? Which neurons? <strong>Which one is less important?</strong></li>
+<li><strong>How to Select Synapses and Select Neurons to Prune</strong></li>
+</ul>
+<section id="select-of-synapses" class="level3">
+<h3 class="anchored" data-anchor-id="select-of-synapses">3.1 <strong>Select of Synapses</strong></h3>
+<p>크게 세 가지로 분류하는데, 각 뉴런의 크기, 각 채널에 전체 뉴런에 대한 크기, 그리고 테일러 급수를 이용하여 gradient와 weight를 모두 고려한 크기를 소개한다. Song han 교수님이 방법들을 소개하기에 앞서서 유수의 기업들도 지난 5년 동안 주로 <strong>Magnitude-based Pruning</strong>만을 사용해왔다고 하는데, 2023년이 돼서 On-device AI가 각광받기 시작해서 점차적으로 관심을 받기 시작한 건가 싶기도 하다.</p>
+<p><strong>3.1.1 Magnitude-based Pruning</strong></p>
+<p>크기를 기준으로 하는 경우, <strong>“얼마만큼 뉴런 그룹에서 고려할 것인가?”</strong>와 “그룹<strong>내에서 어떤 정규화를 사용할 것인가?</strong>를 고려한다.</p>
+<ol type="1">
+<li><p>Heuristic pruning criterion, Element-wise Pruning</p>
+<p><span class="math display">\[
+Importance = \lvert W \lvert
+\]</span></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec03/Untitled 9.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. MIT-TinyML-lecture03-Pruning-1</figcaption>
+</figure>
+</div></li>
+<li><p>Heuristic pruning criterion, Row-wise Pruning, L1-norm magnitude</p>
+<p><span class="math display">\[
+Importance = \sum_{i\in S}\lvert w_i \lvert, \\where\ W^{(S)}\ is\ the\ structural\ set\ S\ of\ parameters\ W
+\]</span></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec03/Untitled 10.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. MIT-TinyML-lecture03-Pruning-1</figcaption>
+</figure>
+</div></li>
+<li><p>Heuristic pruning criterion, Row-wise Pruning, L2-norm magnitude</p>
+<p><span class="math display">\[
+Importance = \sum_{i\in S}\lvert w_i \lvert, \\where\ W^{(S)}\ is\ the\ structural\ set\ S\ of\ parameters\ W
+\]</span></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec03/Untitled 11.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. MIT-TinyML-lecture03-Pruning-1</figcaption>
+</figure>
+</div></li>
+<li><p>Heuristic pruning criterion, <span class="math inline">\(L_p\)</span>- norm</p>
+<p><span class="math display">\[
+\lvert\lvert W^{(S)}\lvert\lvert=\huge( \large
+   \sum_{i\in S} \lvert w_i \lvert^p
+\huge) \large^{\frac{1}{p}}
+\]</span></p></li>
+</ol>
+<p><strong>3.1.2 Scaling-based Pruning</strong></p>
+<p>두 번째로 Scaling을 하는 경우 채널마다 Scaling Factor를 둬서 Pruning을 한다. 그럼 Scaling Factor를 어떻게 둬야 할까? 강의에서 소개하는 <a href="https://arxiv.org/pdf/1708.06519.pdf">이 논문</a>에서는 Scaling factor <span class="math inline">\(\gamma\)</span> 파라미터를 trainable 파라미터로 두면서 batch normalization layer에 사용한다.</p>
+<ul>
+<li><p>Scale factor is associated with each filter(i.e.&nbsp;output channel) in convolution layers.</p></li>
+<li><p>The filters or output channels with small scaling factor magnitude will be pruned</p></li>
+<li><p>The scaling factors can be reused from batch normalization layer</p>
+<p><span class="math display">\[
+  z_o = \gamma\dfrac{z_i-\mu_{B}}{\sqrt{\sigma_B^2+\epsilon}}+\beta
+  \]</span></p></li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec03/Untitled 12.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. MIT-TinyML-lecture03-Pruning-1</figcaption>
+</figure>
+</div>
+<p><strong>3.1.3 Talyor Expansion Analysis on Pruning Error</strong></p>
+<p>세 번째 방법은 테일러 급수를 이용하여 Objective function을 최소화 하는 지점을 찾는 방법입니다. Talyor Series에 대한 <a href="https://ooshyun.github.io/2023/07/02/Taylor-Series-Approximation-and-Error.html">자세한 내용</a>은 여기서!</p>
+<ul>
+<li>Evaluate pruning error induced by pruning synapses.</li>
+<li>Minimize the objective function L(x; W)</li>
+<li>A Taylor series can approximate the induced error.</li>
+</ul>
+<p><span class="math display">\[
+\delta L = L(x;W)-L(x;W_p=W-\delta W) \\ = \sum_i g_i\delta w_i + \frac{1}{2} \sum_i h_{ii}\delta w_i^2 + \frac{1}{2}\sum_{i\not=j}h_{ij}\delta w_i \delta w_j + O(\lvert\lvert \delta W \lvert\lvert^3)
+\]</span> <span class="math display">\[
+where\ g_i=\dfrac{\delta L}{\delta w_i}, h_{i, j} = \dfrac{\delta^2 L}{\delta w_i \delta w_j}
+\]</span></p>
+<ol type="1">
+<li><p>Second-Order-based Pruning</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec03/Untitled 13.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. MIT-TinyML-lecture03-Pruning-1</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec03/Untitled 14.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. MIT-TinyML-lecture03-Pruning-1</figcaption>
+</figure>
+</div>
+<p>Optimal Brain Damage[LeCun&nbsp;<em>et al.,</em>&nbsp;NeurIPS 1989] 논문에서는 이 방법을 이용하기 위해 세 가지를 가정한다.</p>
+<ol type="1">
+<li>Objective function L이 quadratic 이기 때문에 마지막 항이 무시된다(이는 Talyor Series의 Error 항을 알면 이해가 더 쉽다!)</li>
+<li>만약 신경망이 수렴하게되면, 첫 번째항도 무시된다.</li>
+<li>각 파라미터가 독립적이라면 Cross-term도 무시된다.</li>
+</ol>
+<p>그러면 식을 아래처럼 정리할 수 있는데, 중요한 부분은 <strong>Hessian Matrix H에 사용하는 Computation이 어렵다는 점!</strong></p>
+<p><span class="math display">\[
+\delta L_i = L(x;W)-L(x;W_p\lvert w_i=0)\approx \dfrac{1}{2} h_{ii}w_i^2,\ where\ h_{ii}=\dfrac{\partial^2 L}{\partial w_i \partial w_j}
+\]</span></p>
+<p><span class="math display">\[
+importance_{w_i} = \lvert \delta L_i\lvert = \frac{1}{2}h_{ii}w_i^2
+\]</span> <span class="math display">\[
+*\ h_{ii} \text{ is non-negative}
+\]</span></p></li>
+<li><p>First-Order-based Pruning</p>
+<ul>
+<li>참고로 이 방법은 2023년에는 소개하지 않는다.</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec03/Untitled 15.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. MIT-TinyML-lecture03-Pruning-1</figcaption>
+</figure>
+</div>
+<ul>
+<li>If only first-order expansion is considered under an <em>i.i.d(</em>Independent and identically distributed<strong>)</strong> assumption,</li>
+</ul>
+<p><span class="math display">\[
+\delta L_i = L(x;W) - L(x; W_P\lvert w_i=0) \approx g_iw_i,\ where\ g_i=\dfrac{\partial L}{\partial w_i}
+\]</span> <span class="math display">\[
+importance_{w_i} = \lvert \delta L_i \lvert = \lvert g_i w_i \lvert \ or \ importance_{w_i} = \lvert \delta L_i \lvert^2 = (g_i w_i)^2
+\]</span></p>
+<ul>
+<li><p>For coarse-grained pruning, we have,</p>
+<p><span class="math display">\[
+  importance_{\ W^{(S)}} = \sum_{i \in S}\lvert \delta L_i \lvert^2 = \sum_{i \in S} (g_i w_i)^2,\ where \ W^{(S)}is\ the\ structural\ set\ of\ parameters
+  \]</span></p></li>
+</ul></li>
+</ol>
+</section>
+<section id="select-of-neurons" class="level3">
+<h3 class="anchored" data-anchor-id="select-of-neurons">3.2 <strong>Select of Neurons</strong></h3>
+<p>어떤 Neuron을 없앨 지를 고려(<strong>Less useful → Remove)</strong> 한 이 방법은 <strong>Neuron의 경우</strong>도 있지만 아래 그림처럼 <strong>Channel</strong>로 고려할 수도 있다. 확실히 전에 소개했던 방법들보다 <strong>“Coarse-grained pruning”</strong>인 방법이다.</p>
+<p><img src="../../images/lec03/Untitled 16.png" class="img-fluid"></p>
+<ol type="1">
+<li><p>Percentage-of-Zero-based Pruning</p>
+<p>첫번째는 Channel마다 0의 비율을 봐서 비율이 높은 Channel 을 없내는 방법이다. ReLU activation을 사용하면 Output이 0이 나오는데, 여기서 0의 비율, Average Percentage of Zero activations(APoZ)라고 부르는 것을 보고 가지치기할 Channel을 제거한다.</p>
+<ul>
+<li>ReLU activation will generate zeros in the output activation</li>
+<li>Similar to magnitude of weights, the Average Percentage of Zero activations(APoZ) can be exploited to measure the importance the neuron has</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec03/Untitled 17.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. MIT-TinyML-lecture03-Pruning-1</figcaption>
+</figure>
+</div></li>
+<li><p>First-Order-based Pruning</p>
+<ul>
+<li><p>참고로 이 방법은 2023년에는 소개하지 않는 방법이다.</p></li>
+<li><p>Minimize the error on loss function introduced by pruning neurons</p></li>
+<li><p>Similar to previous Taylor expansion on weights, the induced error of the objective function&nbsp;<em>L</em>(x;&nbsp;W)&nbsp;can be approximated by a Taylor series expanded on activations.</p>
+<p><span class="math display">\[
+  \delta L_i = L(x; W) - L(x\lvert x_i = 0; W) \approx \dfrac{\partial L}{\partial x_i}x_i
+  \]</span></p></li>
+<li><p>For a structural set of neurons&nbsp;<span class="math inline">\(x^{(S)}\)</span>&nbsp;(<em>e.g.</em>, a channel plane),</p>
+<p><span class="math display">\[
+  \lvert \delta L_{x^{(S)}} \lvert\ = \Large\lvert \small\sum_{i\in S}\dfrac{\partial L}{\partial x_i}x_i\Large\lvert
+  \]</span></p></li>
+</ul></li>
+<li><p>Regression-based Pruning</p>
+<p>이 방법은 Quantized한 레이어의 output <span class="math inline">\(\hat Z\)</span>(construction error of the corresponding layer’s outputs)와 <span class="math inline">\(Z\)</span>를 Training을 통해 차이를 줄이는 방법이다. 참고로 문제를 푸는 자세한 과정은 2022년 강의에만 나와 있다.</p></li>
+</ol>
+<p><span class="math display">\[
+Z=XW^T=\sum_{c=0}^{c_i-1}X_cW_c^T
+\]</span></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec03/Untitled 18.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. MIT-TinyML-lecture03-Pruning-1</figcaption>
+</figure>
+</div>
+<p>문제를 식으로 정의해보면 아래와 같은데,</p>
+<ul>
+<li><span class="math inline">\(\beta\)</span> is the coefficient vector of length <span class="math inline">\(c_i\)</span> for channel selection.</li>
+<li><span class="math inline">\(\beta_c = 0\)</span> means channel <span class="math inline">\(c\)</span> is pruned.</li>
+<li><span class="math inline">\(N_c\)</span> is the number of none zero channel</li>
+</ul>
+<p>우선 문제를 푸는 단계는 두 단계로 나눈다. Channel의 Scale <span class="math inline">\(\beta\)</span>를 우선 계산한 후에 <span class="math inline">\(W\)</span>를 Quantized한 레이어의 output <span class="math inline">\(\hat Z\)</span>(construction error of the corresponding layer’s outputs)와 <span class="math inline">\(Z\)</span>의 차이가 최소화되는 지점까지 Training시킨다.</p>
+<p>Solve the problem in two folds:</p>
+<ul>
+<li>Fix <strong>W,</strong> solve <span class="math inline">\(\beta\)</span> for channel selection → <strong>NP(Nondeterministic polynomial)-hard</strong></li>
+<li>Fix <strong><span class="math inline">\(\beta\)</span></strong>, solve W to minimize reconstruction error(<strong>Weight Reconstruction)</strong></li>
+</ul>
+<p>각 문제를 푸는 과정을 조금 더 자세히 살펴봐보자. 본 내용은 2022년 강의에 있으니 참고!</p>
+<p><strong>NP(Nondeterministic polynomial)-hard</strong>는 아래와 같이 식으로 정리할 수 있다.</p>
+<p><span class="math display">\[
+\underset{\beta}{argmin} \lvert\lvert Z- \sum_{c=0}^{c_i-1} \beta_cX_cW_c^T \lvert\lvert_F^2 = \lvert\lvert \sum_{c=0}^{c_i-1}X_cW_c^T - \sum_{c=0}^{c_i-1} \beta_cX_cW_c^T \lvert\lvert_F^2
+\]</span> <span class="math display">\[
+= \lvert\lvert\sum_{c=0}^{c_i-1} (1-\beta_c)X_cW_c^T \lvert\lvert_F^2, \ s.t.\ \lvert\lvert\beta\lvert\lvert_0 \ \leq N_c
+\]</span></p>
+<p>강의에서 소개하는 ThiNet이라는 논문에서는 greedy solution을 이용해서 채널 하나하나씩 Pruning 해보며 objective function의 l2-norm 최솟값을 구한다.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="an">1:</span><span class="co"> S = []</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">2:</span><span class="co"> while len(S) &lt; N:</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">3:</span><span class="co">   min_norm, min_c = +inf, 0</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="an">4:</span><span class="co">   for c in range(c_i):</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="an">5:</span><span class="co">     tmpS=S+[c]</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="an">6:</span><span class="co">     Z = X[:,tmpS] * W[:,tmpS].t()</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="an">7:</span><span class="co">     norm = Z.norm(2)</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="an">8:</span><span class="co">     if norm &lt; min_norm:</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="an">9:</span><span class="co">       min_norm, min_c = norm, c</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="an">10:</span><span class="co">   S.append(min_c)</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="an">11:</span><span class="co">   c_i.pop(min_c)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>여기서 더해서 <span class="math inline">\(\beta\)</span> 를 구하는 과정에서 일반화를 위해 LASSO 방식을 사용한다(LASSO에 대한 자세한 내용은 <a href="https://www.notion.so/Statistics-p-value-and-L1-L2-c5cabf858b194d8b9970eb88e739888e?pvs=21">여기서</a>). Relax the <span class="math inline">\(l_0\)</span> to <span class="math inline">\(l_1\)</span> regularization (LASSO):</p>
+<p><span class="math display">\[
+\underset{\beta}{argmin}\ \lvert\lvert Z- \sum_{c=0}^{c_i-1}\beta_cX_cW_c^T\lvert\lvert^2_F+\lambda\lvert\lvert \beta \lvert\lvert_1
+\]</span></p>
+<ul>
+<li><p><span class="math inline">\(\lambda\)</span> is a penalty coefficient. <strong>By increasing <span class="math inline">\(\lambda\)</span>, there will be more zeros in <span class="math inline">\(\beta\)</span>.</strong></p></li>
+<li><p>Gradually increase <span class="math inline">\(\lambda\)</span> and solve the LASSO regression for <span class="math inline">\(\beta\)</span>, until <span class="math inline">\(\lvert\lvert \beta \lvert\lvert_0==N_c\)</span> is met.</p></li>
+<li><p>Why <span class="math inline">\(\lvert\lvert \beta \lvert\lvert_0==N_c\)</span>?</p>
+<p>여기에 대해서는 따로 언급되지 않았지만, 의미상 scale 전체 N개 중에서 최적값을 찾아야한다면 전체를 N으로 유지하면서 최적값을 찾기 위해서가 아닐까?</p></li>
+</ul>
+<p>두 번째는 구한 <span class="math inline">\(\beta\)</span>를 고정한 상태로 Weight를 Quantized 전후의 차이를 최소화 하게 “Weight Reconstruction” 한다. 구하는 과정은 <strong>least square approach</strong>를 이용한 <strong>unique closed-form solution</strong> 이므로 아래를 참조하자.</p>
+<p><span class="math display">\[
+\underset{\beta}{argmin}\ \lvert\lvert Z- \sum_{c=0}^{c_i-1}\beta_cX_cW_c^T\lvert\lvert^2_F
+\]</span></p>
+<ul>
+<li><p><span class="math inline">\(\beta\)</span> is a coefficient vector from the previous step</p></li>
+<li><p>This is a classic <strong>linear regression problem</strong>, which has <strong>a unique closed-form solution</strong> using the <strong>least square</strong> approach.</p>
+<p><span class="math display">\[
+  \underset{W}{argmin} \lvert\lvert Z-\hat{Z} \lvert\lvert^2_F = \lvert\lvert Z-UW^T \lvert\lvert_F^2
+  \]</span></p>
+<p>where</p>
+<p><span class="math display">\[
+  U= \Large[ \small\beta_0X_0\ \beta_1X_1 \ \cdots \beta_cX_c \cdots \beta_{c_i-1}X_{c_i-1} \Large]
+  \]</span></p>
+<p>and thus,</p>
+<p><span class="math display">\[
+  W^T = (U^TU)^{-1}U^T Z
+  \]</span></p>
+<ul>
+<li><p>Q. How <span class="math inline">\((U^TU)^{-1}\)</span> exists?</p>
+<p>Least Square method, 임의의 벡터 <span class="math inline">\(v = (v_0, v_1, \dots, v_n)\)</span> 가 있을 때 <span class="math inline">\(v^Tv\)</span> 의 역행렬은 항상 있을까? 가정에서 “<strong>a unique closed-form solution</strong>”라고 했으므로 이는 즉 linearly independen로 고려할 있고 역행렬이 있다(<span class="math inline">\(v^Tv\)</span> is invertible)는 이야기이다.</p></li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="discussion" class="level2">
+<h2 class="anchored" data-anchor-id="discussion">4. Discussion</h2>
+<ol type="1">
+<li><p>Pruning을 Dropout이랑 비교해서 어떤 차이점이 있는가?</p>
+<p>두 가지 방법은 분명히 Neuron과 Synapse를 없댄다는 측면에서는 비슷하다. 하지만 두 가지 측면에서 차이점이 있는데, 한 가지는 목적하는 바이고, 두 번째는 시점이다. Dropout은 목적하는 바가 훈련중에 overfitting을 방지하기 위함이 있고 Pruning의 경우는 <strong>훈련을 마친 모델</strong>의 크기를 줄이는 것에 있다. 그리고 두 번째 시점의 경우 Dropout은 훈련중에 이뤄지는 반면 Pruning은 훈련을 마치고, 그 크기를 줄인 후에 성능이 떨어지면 그에 맞게 Fine-tuning을 한다.</p>
+<p>스터디에서는 “왜 dropout을 통해 사이즈를 줄이지 않았는가? 그리고 구지 훈련을 마친 다음에 할 필요가 있나?” 라고 질문이 나왔었다. 물론 훈련 중에 모델의 사이즈를 작게 만들 수 있으면, 가능한 그렇게 하면 될 것이다. 하지만, 이 또한 두가지 측면을 고려할 필요가 있다. 하나는 “과연 모델의 사이즈를 훈련 중 혹은 전에 줄여나가면서 충분히 성능을 낼 수 있는가?”이고 다른 하나는 Pruning이나 모델 경량화는 <strong>최적화에 초점</strong>을 맞춘다고 생각한다. 그렇기 때문에 훈련 중간에 Channel pruning과 같은 기법을 사용할 수 있을 지는 미지수이고, 설령 Fine-grained Pruning과 같은 기법을 사용한다 하더라도 이는 모델의 사이즈만 줄어 들 뿐, 나머지 메모리(e.g.&nbsp;RAM)이나 Latency같은 성능은 좋게 가져갈 수 있을지도 미지수라고 생각한다.</p>
+<p>필자는 위와 같은 최적화를 통한 성능 개선을 <a href="https://ooshyun.github.io/2023/12/04/Optimization-for-tiny-engine-1.html">이 글</a>에서처럼 2022년 TinyML 강의에서 제공하는 실습을 통해 경험했었다. 앞선 예시는 OS를 가진 디바이스가 아닌 Bare-metal firmware로 환경이 조금 특수하기도 하고, 실제로 Torch나 Tensorflowlite에서 제공하는 모델 경량화를 직접적으로 분석해봐야 실질적인 예시를 알 수 있겠지만, 혹여 이해해 참고가 될까 덧붙여 놓는다.</p></li>
+</ol>
+</section>
+<section id="reference" class="level2">
+<h2 class="anchored" data-anchor-id="reference">5. Reference</h2>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=w5WiUcDJosM&amp;list=PL80kAHvQbh-pT4lCkDT53zT8DKmhE0idB&amp;index=5">MIT-TinyML-lecture03-Pruning-1</a></li>
+<li><a href="https://arxiv.org/pdf/1802.03494.pdf">AMC: Automl for Model Compression and Acceleration on Mobile Devices, 2018</a></li>
+<li><a href="https://arxiv.org/pdf/1708.06519.pdf">Learning Efficient Convolutional Networks through Network Slimming, 2017</a></li>
+<li><a href="https://arxiv.org/pdf/1707.06342.pdf">ThiNet: A Filter Level Pruning Method for Deep Neural Network Compression, 2017</a></li>
+<li><a href="https://arxiv.org/pdf/1707.06168.pdf">Channel Pruning for Accelerating Very Deep Neural Networks</a></li>
+</ul>
+
+
 </section>
 
 </main> <!-- /main -->
@@ -215,9 +668,23 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     icon: icon
   };
   anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
   const clipboard = new window.ClipboardJS('.code-copy-button', {
-    target: function(trigger) {
-      return trigger.previousElementSibling;
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
     }
   });
   clipboard.on('success', function(e) {
@@ -253,10 +720,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
-  function tippyHover(el, contentFn) {
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -266,8 +732,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -282,6 +757,238 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return note.innerHTML;
     });
   }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
   const findCites = (el) => {
     const parentEl = el.parentElement;
     if (parentEl) {
@@ -322,6 +1029,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
+
 
 
 
