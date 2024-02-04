@@ -9,4 +9,13 @@ listing:
   filter-ui: false
 page-layout: full
 title-block-banner: true
+comments: false
+---
+
+
+> 스터디 자료와 관련해서 어떤 토의나 의견 모두 감사합니다! Github [Discussion](https://github.com/TINYML-KOR/blog/discussions)에 글을 남겨주셔도 좋고 각 포스팅 하단에 있는 Giscus 댓글창에 코멘트들을 남겨주시면 됩니다.
+>
+> Welcome to any comments or opinions on our content! You can leave messages using the direct [Discussion](https://github.com/TINYML-KOR/blog/discussions) or the Giscus window on each post.
+> 
+
 ---

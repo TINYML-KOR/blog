@@ -14,3 +14,7 @@ format:
     # title-block-style: default
     fontsize: 12pt
     linestretch: 2.0
+
+comments:
+  giscus: 
+    repo: TINYML-KOR/blog
