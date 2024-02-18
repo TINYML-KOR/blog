@@ -1,0 +1,203 @@
+---
+toc: true
+title: "🧑‍🏫 Lecture 4"
+description:  Pruning and Sparsity (Part II)
+author: "Jung Yeon Lee"
+date: "2024-02-18"
+categories: [TinyML, EdgeAI]
+---
+
+
+이전 포스팅에서 **“가지치기”**라는 의미를 가진 **Pruning**에 대해서 배웠었다. 이번에는 Pruning에 대한 남은 이야기를 배우고자 한다. 
+
+## 1. Pruning Ratio
+
+Pruning을 하기 위해서 어느 정도 Pruning을 해야 할지 어떻게 정해야 할까?
+
+즉, 다시 말해서 **몇 % 정도** 그리고 **어떻게** Pruning을 해야 좋을까?
+
+![1](../../images/lec04/1.png)
+
+우선 Channel 별 Pruning을 할 때, Channel 구분 없이 동일한 Pruning 비율(`Uniform`)을 적용하면 성능이 좋지 않다. 오른쪽 그래프에서 지향해야 하는 방향은 **Latency는 적게, Accuracy는 높게**이므로 왼쪽 상단의 영역이 되도록 Pruning을 진행해야 한다.  그렇다면 결론은 **Channel 별 구분**을 해서 `어떤 Channel은 Pruning 비율을 높게, 어떤 Channel은 Pruning 비율을 낮게` 해야 한다는 이야기가 된다.
+
+### 1.1 Sensitiviy Analysis
+
+**Channel 별 구분**을 해서 Pruning을 한다는 기본 아이디어는 아래와 같다.
+
+- **Accuracy에 영향을 많이 주는** Layer는 **Pruning을 적게** 해야 한다.
+- **Accuracy에 영향을 적게 주는** Layer는 **Pruning을 많이** 해야 한다.
+
+Accuracy를 되도록이면 원래의 모델보다 덜 떨어지게 만들면서 Pruning을 해서 모델을 가볍게 만드는 것이 목표이기 때문에 당연한 아이디어일 것이다. **Accuracy에 영향을 많이 준다**는 말은 **Sensitive한 Layer이다**라는 표현으로 다르게 말할 수 있다. 따라서 각 Layer의 Senstivity를 측정해서 **Sensitive한 Layer는 Pruning Ratio를 낮게** 설계하면 된다.
+
+Layer의 Sensitivity를 측정하기 위해 **Sensitivity Analysis**를 진행해보자. 당연히 특정 Layer의 Pruning Ratio가 높을 수록 weight가 많이 가지치기 된 것이므로 Accuracy는 떨어지게 된다.
+
+![2](../../images/lec04/2.png)
+
+::: {.callout-tip collapse="true"}
+## Pruning을 하는 Weight는 어떻게 결정하나요?
+
+Pruning Ratio에 의해 Pruned 되는 weight는 이전 강의에서 배운 “Importance(weight의 절댓값 크기)”에 따라 선택된다.
+
+:::
+
+위의 그림에서 처럼 `Layer 0(L0)`만을 가지고 Pruning Ratio를 높여가면서 관찰해보면, 약 70% 이후부터는 Accuracy가 급격하게 떨어지는 것을 볼 수 있다. `L0`에서 Ratio를 높여가며 Accuracy의 변화를 관찰한 것처럼 다른 Layer들도 관찰해보자.
+
+![3](../../images/lec04/3.png)
+
+`L1`은 다른 Layer들에 비해 상대적으로 Pruning Ratio를 높여가도 Accuracy의 떨어지는 정도가 **약한** 반면, `L0`는 다른 Layer들에 비해 상대적으로 Pruning Ratio를 높여가면 Accuracy의 떨어지는 정도가 **심한** 것을 확인할 수 있다. 따라서 `L1`은 **Sensitivity가 높다**고 볼 수 있으며 **Pruning을 적게**해야 하고, `L0`은 **Sensitivity가 낮다**고 볼 수 있으며 **Pruning을 많게**해야 함을 알 수 있다.
+
+여기서 Sensitivity Analysis에서 고려해야할 몇가지 사항들에 대해서 짚고 넘어가자.
+
+1. Sensitivity Analysis에서 모든 Layer들이 독립적으로 작동한다는 것을 전제로 한다. 즉, `L0`의 Pruning이 `L1`의 효과에 영향을 주지 않는 독립성을 가진다는 것을 전제로 한다.
+2. Layer의 Pruning Ratio가 동일하다고 해서 Pruned Weight수가 같음을 의미하지 않는다.
+    - 100개의 weight가 있는 layer의 10% Pruning Ratio 적용은 **10개의 weight**가 pruned 되었음을 의미하고, 500개의 weight가 있는 layer의 10% Pruning Ratio 적용은 **50개의 weight**가 pruned 되었음을 의미한다.
+    - **Layer의 전체 크기에 따라** Pruning Ratio의 적용 효과는 다를 수 있다.
+
+Sensitivity Analysis까지 진행한 후에는 보통 사람이 Accuracy가 떨어지는 정도, threshold를 정해서 Pruning Ratio를 정한다.
+
+![4](../../images/lec04/4.png)
+
+위 그래프에서는 Accuracy가 약 75%수준으로 유지되는 threhsold $T$ 수평선을 기준으로 `L0`는 약 74%, `L4`는 약 80%, `L3`는 약 82%, `L2`는 90%까지 Pruning을 진행해야 겠다고 정한 예시를 보여준다. **민감한** layer인 `L0`는 상대적으로 Pruning을 `적게`, **덜 민감한** layer인 `L2`는 Pruning을 `많게` 하는 것을 확인할 수 있다.
+
+물론 사람이 정하는 threshold는 개선의 여지가 물론 있다. Pruning Ratio를 좀 더 Automatic하게 찾는 방법에 대해 알아보자.
+
+### 1.2 AMC
+
+AMC는 **A**utoML for **M**odel **C**ompression의 약자로, 강화학습(Reinforcement Learning) 방법으로 최적의 Pruning Ratio를 찾도록 하는 방법이다.
+
+![5](../../images/lec04/5.png)
+
+AMC의 구조는 위 그림과 같다. 강화학습 알고리즘 계열 중, Actor-Critic 계열의 알고리즘인 [Deep Deterministic Policy Gradient(DDPG)](https://arxiv.org/abs/1509.02971)을 활용하여 Pruning Ratio를 정하는 Action을 선택하도록 학습한다. 
+
+
+![6](../../images/lec04/6.png)
+
+
+Reward는 
+
+![7](../../images/lec04/7.png)
+
+이렇게 AMC로 Pruning을 진행했을 때, Human Expert가 Pruning 한 것과 비교해보자. 아래 그래프 `Total`에서 **동일 Accuracy가 나오도록** Pruning을 진행했을 때, AMC로 Pruning을 진행한 것이 **Density가 낮은 것**을 확인할 수 있다. 즉, AMC로 pruning을 진행했을 때 더 많은 weight를 pruning하여 더 가벼운 모델을 가지고도 Accuracy를 유지했다고 볼 수 있다.
+
+![8](../../images/lec04/8.png)
+
+
+아래 그래프에서 AMC를 가지고 Pruning과 Fine-tuning을 번갈아 가며 여러 스텝으로 진행해가면서 관찰한 것을 조금 더 자세히 살펴보자. 각 Iteration(Pruning+Fine-tuning)을 stage1, 2, 3, 4로 나타내어 plot한 것을 보면, `1x1 conv`보다 `3x3 conv`에서 Density가 더 낮은 것을 확인할 수 있다. 즉, `3x3 conv`에서 `1x1 conv`보다 Pruning을 많이 한 것을 볼 수 있다. 이를 해석해보자면, AMC가 `3x3 conv`을 Pruning하면 9개의 weight를 pruning하고 이는 `1x1 conv` pruning해서 1개의 weight를 없애는 것보다 한번에 더 많은 weight 수를 줄일 수 있기 때문에 `3x3 conv` pruning을 적극 활용했을 것으로 볼 수 있다.
+
+
+::: {.callout-tip collapse="true"}
+## AMC 실험 결과표에서 `0.75 MobileNet`의 SpeedUp이 왜 **1.7x** 인가요?
+
+![9](../../images/lec04/9.png)
+
+이 표에서 A
+
+:::
+
+
+
+### 1.3 NetAdapt
+
+또 다른 Pruning Ratio를 정하는 기법으로 **Latency Constraint**를 가지고 layer마다 pruning을 적용해본다. 예를 들어, **줄일 목표 latency 량**을 `lms`로 정하면, `10ms` → `9ms`로 줄 때까지 layer의 pruning ratio를 높여가는 방법이다.
+
+![10](../../images/lec04/10.png)
+
+아래 그림에서 NetAdapt의 전체적인 과정을 살펴볼 수 있다. 기존 모델에서 각 layer를 pruning하면서 Accuracy($Acc_A$등)을 측정한다.  
+
+1. 각 layer의 pruning ratio를 조절
+2. Short-term fine tuning
+3. Latency Constraint에 도달했는지 확인
+4. 도달했다면 최적의 pruning ratio로 판단
+5. 각 layer의 최적 pruning ratio가 정해졌다면 마지막 long-term fine tuning을 진행
+
+![11](../../images/lec04/11-1708245565699-12.png)
+
+
+
+![12](../../images/lec04/12.png)
+
+
+
+## 2. Fine-tuning/Train
+
+Prunned 모델의 퍼포먼스를 향상하기 위해서는 pruning를 진행하고 나서 Fine-tuning과정이 필요하다. 
+
+### 2.1 Iterative Pruning
+
+보통 Pruned 모델의 Fine-tuning 과정에서는 기존에 학습했던 learning rate보다 작은 rate를 사용한다. 예)1/100 또는 1/10 
+Pruning 과정과 Fine-tuning 과정은 단발성으로 진행하기보다 점차적으로 pruning ratio를 늘려가며 pruning, fine-tuning을 번갈아가며 진행하는게 더 좋다
+
+![13](../../images/lec04/13.png)
+
+
+
+### 2.2 Regularization
+
+- 가능한 많은 0 weights
+- 작은 값의 weights들이 될 수 있도록 - 다음 layer들을 거치면서 0이 될 가능성 ↑
+
+
+
+![14](../../images/lec04/14.png)
+
+### 2.3 The Lottery Ticket Hypothesis
+
+
+
+![15](../../images/lec04/15.png)
+
+```
+프루닝은 훈련 전에도 수행될 수 있습니다. 이 기술에서는 훈련이 시작되기 전에 가중치가 무작위로 초기화됩니다. 일정 비율의 가중치가 무작위로 프루닝됩니다. 프루닝된 가중치는 훈련 중에 0으로 유지됩니다. 이 초기화에서의 프루닝(Pruning at Initialization, PAT)은 "로터리 티켓 가설"에 의해 영감을 받았습니다. 이 가설은 큰 규모의 무작위로 초기화된 네트워크 내에 처음부터 독립적으로 훈련될 경우 전체 네트워크와 비교할 수 있는 성능을 달성할 수 있는 더 작은 하위 네트워크("winning tickets")가 존재할 수 있다고 제안합니다.
+```
+
+
+
+![16](../../images/lec04/16.png)
+
+
+
+
+
+
+## 3. System Support for Sparsity
+
+![17](../../images/lec04/17.png)
+
+DNN을 가속화 시키는 방법은 크게 3가지, Sparse Weight, Sparse Activation, Weight Sharing이 있다.
+
+
+
+### 3.1 EIE
+
+
+
+![18](../../images/lec04/18.png)
+
+
+
+![19](../../images/lec04/19.png)
+
+여기서
+
+
+
+
+### 3.2 M:N
+
+
+
+
+
+### 3.3 SparseCNN
+
+
+
+
+
+
+## 4. Reference
+- [MIT-TinyML-lecture03-Pruning-1](https://www.youtube.com/watch?v=w5WiUcDJosM&list=PL80kAHvQbh-pT4lCkDT53zT8DKmhE0idB&index=5)
+- [LLM Inference - HW/SW Optimizations](https://tulip-phalange-a1e.notion.site/LLM-Inference-HW-SW-Optimizations-827ac8f45d734f00af369ef7492f8d45)
+- [AMC: Automl for Model Compression and Acceleration on Mobile Devices, 2018](https://arxiv.org/pdf/1802.03494.pdf)
+- [Continuous control with deep reinforcement learning](https://arxiv.org/abs/1509.02971)
+- [FLOPs란? 딥러닝 연산량에 대해서](https://kimbg.tistory.com/26)
