@@ -44,12 +44,12 @@ about:
 - [x]  Lecture 4: Pruning and Sparsity (Part II) @curieuxjy
 - [x]  Lab 1 @CastleFlag
 - [ ]  Lecture 5: Quantization (Part I) @ooshyun
-- [ ]  Lecture 6: Quantization (Part II) @curieuxjy
-- [ ]  Lab 2  @CastleFlag
-- [ ]  Lecture 7: Neural Architecture Search (Part I) @ooshyun
-- [ ]  Lecture 8: Neural Architecture Search (Part II) @curieuxjy
-- [ ]  Lab 3 @CastleFlag
-- [ ]  Lecture 9: Knowledge Distillation @ooshyun
+- [ ]  Lecture 6: Quantization (Part II) @ooshyun
+- [ ]  Lab 2  @curieuxjy
+- [ ]  Lecture 7: Neural Architecture Search (Part I) @CastleFlag
+- [ ]  Lecture 8: Neural Architecture Search (Part II) @CastleFlag
+- [ ]  Lab 3 @ooshyun
+- [ ]  Lecture 9: Knowledge Distillation @curieuxjy
 - [ ]  Lecture 10: MCUNet: TinyML on Microcontrollers @curieuxjy
 - [ ]  Lecture 11: TinyEngine and Parallel Processing @CastleFlag
 
