@@ -4,7 +4,7 @@ title: "🧑‍🏫 Lecture 3"
 description:  Pruning and Sparsity (Part I)
 author: "Seunghyun Oh"
 date: "2024-01-28"
-categories: [TinyML, EdgeAI]
+categories: [pruning, lecture]
 ---
 
 <style>

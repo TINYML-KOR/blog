@@ -160,8 +160,8 @@ window.Quarto = {
   <li><a href="#system-support-for-sparsity" id="toc-system-support-for-sparsity" class="nav-link" data-scroll-target="#system-support-for-sparsity">3. System Support for Sparsity</a>
   <ul class="collapse">
   <li><a href="#eie" id="toc-eie" class="nav-link" data-scroll-target="#eie">3.1 EIE</a></li>
-  <li><a href="#mn" id="toc-mn" class="nav-link" data-scroll-target="#mn">3.2 M:N</a></li>
-  <li><a href="#sparsecnn" id="toc-sparsecnn" class="nav-link" data-scroll-target="#sparsecnn">3.3 SparseCNN</a></li>
+  <li><a href="#mn-weight-sparsity" id="toc-mn-weight-sparsity" class="nav-link" data-scroll-target="#mn-weight-sparsity">3.2 M:N Weight Sparsity</a></li>
+  <li><a href="#sparse-convolution" id="toc-sparse-convolution" class="nav-link" data-scroll-target="#sparse-convolution">3.3 Sparse Convolution</a></li>
   </ul></li>
   <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference">4. Reference</a></li>
   </ul>
@@ -174,8 +174,8 @@ window.Quarto = {
 <div class="quarto-title">
 <h1 class="title">🧑‍🏫 Lecture 4</h1>
   <div class="quarto-categories">
-    <div class="quarto-category">TinyML</div>
-    <div class="quarto-category">EdgeAI</div>
+    <div class="quarto-category">pruning</div>
+    <div class="quarto-category">lecture</div>
   </div>
   </div>
 
@@ -210,17 +210,17 @@ window.Quarto = {
 </header>
 
 
-<p>이전 포스팅에서 <strong>“가지치기”</strong>라는 의미를 가진 <strong>Pruning</strong>에 대해서 배웠었다. 이번에는 Pruning에 대한 남은 이야기를 배우고자 한다.</p>
+<p><a href="https://tinyml-kor.github.io/blog/posts/lecs/lec03.html">이전 포스팅</a>에서 <strong>Pruning</strong>에 대해서 배웠었다. 이번에는 Pruning에 대한 남은 이야기인 <code>Pruning Ratio를 정하는 방법</code>, <code>Fine-tuning 과정</code>에 대해 알아보고, 마지막으로 <code>Sparsity를 위한 System Support</code>에 대해 알아보고자 한다.</p>
 <section id="pruning-ratio" class="level2">
 <h2 class="anchored" data-anchor-id="pruning-ratio">1. Pruning Ratio</h2>
 <p>Pruning을 하기 위해서 어느 정도 Pruning을 해야 할지 어떻게 정해야 할까?</p>
 <p>즉, 다시 말해서 <strong>몇 % 정도</strong> 그리고 <strong>어떻게</strong> Pruning을 해야 좋을까?</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../../images/lec04/1.png" class="img-fluid figure-img"></p>
-<figcaption>1</figcaption>
-</figure>
-</div>
+<center>
+<img src="../../images/lec04/1.png" width="70%">
+<figcaption>
+Pruning 방식 비교
+</figcaption>
+</center>
 <p>우선 Channel 별 Pruning을 할 때, Channel 구분 없이 동일한 Pruning 비율(<code>Uniform</code>)을 적용하면 성능이 좋지 않다. 오른쪽 그래프에서 지향해야 하는 방향은 <strong>Latency는 적게, Accuracy는 높게</strong>이므로 왼쪽 상단의 영역이 되도록 Pruning을 진행해야 한다. 그렇다면 결론은 <strong>Channel 별 구분</strong>을 해서 <code>어떤 Channel은 Pruning 비율을 높게, 어떤 Channel은 Pruning 비율을 낮게</code> 해야 한다는 이야기가 된다.</p>
 <section id="sensitiviy-analysis" class="level3">
 <h3 class="anchored" data-anchor-id="sensitiviy-analysis">1.1 Sensitiviy Analysis</h3>
@@ -231,12 +231,12 @@ window.Quarto = {
 </ul>
 <p>Accuracy를 되도록이면 원래의 모델보다 덜 떨어지게 만들면서 Pruning을 해서 모델을 가볍게 만드는 것이 목표이기 때문에 당연한 아이디어일 것이다. <strong>Accuracy에 영향을 많이 준다</strong>는 말은 <strong>Sensitive한 Layer이다</strong>라는 표현으로 다르게 말할 수 있다. 따라서 각 Layer의 Senstivity를 측정해서 <strong>Sensitive한 Layer는 Pruning Ratio를 낮게</strong> 설계하면 된다.</p>
 <p>Layer의 Sensitivity를 측정하기 위해 <strong>Sensitivity Analysis</strong>를 진행해보자. 당연히 특정 Layer의 Pruning Ratio가 높을 수록 weight가 많이 가지치기 된 것이므로 Accuracy는 떨어지게 된다.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../../images/lec04/2.png" class="img-fluid figure-img"></p>
-<figcaption>2</figcaption>
-</figure>
-</div>
+<center>
+<img src="../../images/lec04/2.png" width="100%">
+<figcaption>
+L0 Pruning Rate 그래프
+</figcaption>
+</center>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -254,14 +254,14 @@ Pruning을 하는 Weight는 어떻게 결정하나요?
 </div>
 </div>
 <p>위의 그림에서 처럼 <code>Layer 0(L0)</code>만을 가지고 Pruning Ratio를 높여가면서 관찰해보면, 약 70% 이후부터는 Accuracy가 급격하게 떨어지는 것을 볼 수 있다. <code>L0</code>에서 Ratio를 높여가며 Accuracy의 변화를 관찰한 것처럼 다른 Layer들도 관찰해보자.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../../images/lec04/3.png" class="img-fluid figure-img"></p>
-<figcaption>3</figcaption>
-</figure>
-</div>
+<center>
+<img src="../../images/lec04/3.png" width="100%">
+<figcaption>
+Layer별 Sensitivity 비교
+</figcaption>
+</center>
 <p><code>L1</code>은 다른 Layer들에 비해 상대적으로 Pruning Ratio를 높여가도 Accuracy의 떨어지는 정도가 <strong>약한</strong> 반면, <code>L0</code>는 다른 Layer들에 비해 상대적으로 Pruning Ratio를 높여가면 Accuracy의 떨어지는 정도가 <strong>심한</strong> 것을 확인할 수 있다. 따라서 <code>L1</code>은 <strong>Sensitivity가 높다</strong>고 볼 수 있으며 <strong>Pruning을 적게</strong>해야 하고, <code>L0</code>은 <strong>Sensitivity가 낮다</strong>고 볼 수 있으며 <strong>Pruning을 많게</strong>해야 함을 알 수 있다.</p>
-<p>여기서 Sensitivity Analysis에서 고려해야할 몇가지 사항들에 대해서 짚고 넘어가자.</p>
+<p>여기서 Sensitivity Analysis에서 <strong>고려해야할 몇가지 사항들</strong>에 대해서 짚고 넘어가자.</p>
 <ol type="1">
 <li>Sensitivity Analysis에서 모든 Layer들이 독립적으로 작동한다는 것을 전제로 한다. 즉, <code>L0</code>의 Pruning이 <code>L1</code>의 효과에 영향을 주지 않는 독립성을 가진다는 것을 전제로 한다.</li>
 <li>Layer의 Pruning Ratio가 동일하다고 해서 Pruned Weight수가 같음을 의미하지 않는다.
@@ -271,46 +271,53 @@ Pruning을 하는 Weight는 어떻게 결정하나요?
 </ul></li>
 </ol>
 <p>Sensitivity Analysis까지 진행한 후에는 보통 사람이 Accuracy가 떨어지는 정도, threshold를 정해서 Pruning Ratio를 정한다.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../../images/lec04/4.png" class="img-fluid figure-img"></p>
-<figcaption>4</figcaption>
-</figure>
-</div>
+<center>
+<img src="../../images/lec04/4.png" width="100%">
+<figcaption>
+Threshold 정하기
+</figcaption>
+</center>
 <p>위 그래프에서는 Accuracy가 약 75%수준으로 유지되는 threhsold <span class="math inline">\(T\)</span> 수평선을 기준으로 <code>L0</code>는 약 74%, <code>L4</code>는 약 80%, <code>L3</code>는 약 82%, <code>L2</code>는 90%까지 Pruning을 진행해야 겠다고 정한 예시를 보여준다. <strong>민감한</strong> layer인 <code>L0</code>는 상대적으로 Pruning을 <code>적게</code>, <strong>덜 민감한</strong> layer인 <code>L2</code>는 Pruning을 <code>많게</code> 하는 것을 확인할 수 있다.</p>
 <p>물론 사람이 정하는 threshold는 개선의 여지가 물론 있다. Pruning Ratio를 좀 더 Automatic하게 찾는 방법에 대해 알아보자.</p>
 </section>
 <section id="amc" class="level3">
 <h3 class="anchored" data-anchor-id="amc">1.2 AMC</h3>
 <p>AMC는 <strong>A</strong>utoML for <strong>M</strong>odel <strong>C</strong>ompression의 약자로, 강화학습(Reinforcement Learning) 방법으로 최적의 Pruning Ratio를 찾도록 하는 방법이다.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../../images/lec04/5.png" class="img-fluid figure-img"></p>
-<figcaption>5</figcaption>
-</figure>
-</div>
-<p>AMC의 구조는 위 그림과 같다. 강화학습 알고리즘 계열 중, Actor-Critic 계열의 알고리즘인 <a href="https://arxiv.org/abs/1509.02971">Deep Deterministic Policy Gradient(DDPG)</a>을 활용하여 Pruning Ratio를 정하는 Action을 선택하도록 학습한다.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../../images/lec04/6.png" class="img-fluid figure-img"></p>
-<figcaption>6</figcaption>
-</figure>
-</div>
-<p>Reward는</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../../images/lec04/7.png" class="img-fluid figure-img"></p>
-<figcaption>7</figcaption>
-</figure>
-</div>
-<p>이렇게 AMC로 Pruning을 진행했을 때, Human Expert가 Pruning 한 것과 비교해보자. 아래 그래프 <code>Total</code>에서 <strong>동일 Accuracy가 나오도록</strong> Pruning을 진행했을 때, AMC로 Pruning을 진행한 것이 <strong>Density가 낮은 것</strong>을 확인할 수 있다. 즉, AMC로 pruning을 진행했을 때 더 많은 weight를 pruning하여 더 가벼운 모델을 가지고도 Accuracy를 유지했다고 볼 수 있다.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../../images/lec04/8.png" class="img-fluid figure-img"></p>
-<figcaption>8</figcaption>
-</figure>
-</div>
-<p>아래 그래프에서 AMC를 가지고 Pruning과 Fine-tuning을 번갈아 가며 여러 스텝으로 진행해가면서 관찰한 것을 조금 더 자세히 살펴보자. 각 Iteration(Pruning+Fine-tuning)을 stage1, 2, 3, 4로 나타내어 plot한 것을 보면, <code>1x1 conv</code>보다 <code>3x3 conv</code>에서 Density가 더 낮은 것을 확인할 수 있다. 즉, <code>3x3 conv</code>에서 <code>1x1 conv</code>보다 Pruning을 많이 한 것을 볼 수 있다. 이를 해석해보자면, AMC가 <code>3x3 conv</code>을 Pruning하면 9개의 weight를 pruning하고 이는 <code>1x1 conv</code> pruning해서 1개의 weight를 없애는 것보다 한번에 더 많은 weight 수를 줄일 수 있기 때문에 <code>3x3 conv</code> pruning을 적극 활용했을 것으로 볼 수 있다.</p>
+<center>
+<img src="../../images/lec04/5.png" width="100%">
+<figcaption>
+AMC 전체 구조
+</figcaption>
+</center>
+<p>AMC의 구조는 위 그림과 같다. 강화학습 알고리즘 계열 중, Actor-Critic 계열의 알고리즘인 <a href="https://arxiv.org/abs/1509.02971">Deep Deterministic Policy Gradient(DDPG)</a>을 활용하여 <strong>Pruning Ratio를 정하는 Action</strong>을 선택하도록 학습한다. 자세한 MDP(Markov Decision Process) 설계는 아래와 같다.</p>
+<center>
+<img src="../../images/lec04/6.png" width="90%">
+<figcaption>
+AMC의 MDP
+</figcaption>
+</center>
+<p>강화학습 Agent의 학습 방향을 결정하는 중요한 Reward Function은 모델의 Accuracy를 고려해서 <code>Error</code>를 줄이도록 유도할 뿐만 아니라 Latency를 간접적으로 고려할 수 있도록 모델의 연산량을 나타내는 <code>FLOP</code>를 적게 하도록 유도하도록 설계한다. 오른쪽에 모델들의 연산량 별(<code>Operations</code>) <code>Top-1 Accuracy</code> 그래프를 보면 연산량이 많을수록 로그함수처럼 Accuracy가 증가하는 것을 보고 이를 보고 반영한 부분이라고 볼 수 있다.</p>
+<center>
+<img src="../../images/lec04/20.png" width="90%">
+<figcaption>
+AMC의 Reward Function
+</figcaption>
+</center>
+<p>이렇게 AMC로 Pruning을 진행했을 때, Human Expert가 Pruning 한 것과 비교해보자. 아래 모델 섹션별 Density 히스토그램 그래프에서 <code>Total</code>을 보면, <strong>동일 Accuracy가 나오도록</strong> Pruning을 진행했을 때 AMC로 Pruning을 진행한 것(주황색)이 Human Expert Pruning 모델(파란색)보다 <strong>Density가 낮은 것</strong>을 확인할 수 있다. 즉, AMC로 Pruning 진행했을 때 더 많은 weight를 Pruning 더 가벼운 모델을 가지고도 Accuracy를 유지했다고 볼 수 있다.</p>
+<center>
+<img src="../../images/lec04/8.png" width="90%">
+<figcaption>
+AMC의 Density Graph
+</figcaption>
+</center>
+<p>두번째 꺾은 선 그래프에서 AMC를 가지고 Pruning과 Fine-tuning을 번갈아 가며 여러 스텝으로 진행해가면서 관찰한 것을 조금 더 자세히 살펴보자. 각 Iteration(Pruning+Fine-tuning)을 stage1, 2, 3, 4로 나타내어 plot한 것을 보면, <code>1x1 conv</code>보다 <code>3x3 conv</code>에서 Density가 더 낮은 것을 확인할 수 있다. 즉, <code>3x3 conv</code>에서 <code>1x1 conv</code>보다 Pruning을 많이 한 것을 볼 수 있다. 이를 해석해보자면, AMC가 <code>3x3 conv</code>을 Pruning하면 9개의 weight를 pruning하고 이는 <code>1x1 conv</code> pruning해서 1개의 weight를 없애는 것보다 한번에 더 많은 weight 수를 줄일 수 있기 때문에 <code>3x3 conv</code> pruning을 적극 활용했을 것으로 볼 수 있다.</p>
+<center>
+<img src="../../images/lec04/9.png" width="90%">
+<figcaption>
+AMC Result
+</figcaption>
+</center>
+<p>이 AMC 실험 결과표에서 보면, FLOP와 Time 각각 50%로 줄인 AMC 모델 둘다 Top-1 Accuracy가 기존의 <code>1.0 MobileNet</code>의 Accuracy보다 약 0.1~0.4% 정도만 줄고 Latency나 SpeedUp이 효율적으로 조정된 것을 확인할 수 있다.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -323,131 +330,196 @@ AMC 실험 결과표에서 <code>0.75 MobileNet</code>의 SpeedUp이 왜 <strong
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../../images/lec04/9.png" class="img-fluid figure-img"></p>
-<figcaption>9</figcaption>
-</figure>
-</div>
-<p>이 표에서 A</p>
+<p>결과표에서 <code>0.75 MobileNet</code>은 25%의 weight를 감소시킨 것이기 때문에 SpeedUp이 <span class="math inline">\(\frac{4}{3} \simeq 1.3\)</span>x이어야 한다고 생각할 수 있다. 하지만 연산량은 quadratic하게 감소하게 되기 때문에 <span class="math inline">\(\frac{4}{3} \cdot \frac{4}{3} \simeq 1.7\)</span>x로 SpeedUp이 된다.</p>
 </div>
 </div>
 </div>
 </section>
 <section id="netadapt" class="level3">
 <h3 class="anchored" data-anchor-id="netadapt">1.3 NetAdapt</h3>
-<p>또 다른 Pruning Ratio를 정하는 기법으로 <strong>Latency Constraint</strong>를 가지고 layer마다 pruning을 적용해본다. 예를 들어, <strong>줄일 목표 latency 량</strong>을 <code>lms</code>로 정하면, <code>10ms</code> → <code>9ms</code>로 줄 때까지 layer의 pruning ratio를 높여가는 방법이다.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../../images/lec04/10.png" class="img-fluid figure-img"></p>
-<figcaption>10</figcaption>
-</figure>
-</div>
-<p>아래 그림에서 NetAdapt의 전체적인 과정을 살펴볼 수 있다. 기존 모델에서 각 layer를 pruning하면서 Accuracy(<span class="math inline">\(Acc_A\)</span>등)을 측정한다.</p>
+<p>또 다른 Pruning Ratio를 정하는 기법으로 <a href="https://arxiv.org/abs/1804.03230">NetAdapt</a>이 있다. <strong>Latency Constraint</strong>를 가지고 layer마다 pruning을 적용해본다. 예를 들어, <strong>줄일 목표 latency 량</strong>을 <code>lms</code>로 정하면, <code>10ms</code> → <code>9ms</code>로 줄 때까지 layer의 pruning ratio를 높여가는 방법이다.</p>
+<center>
+<img src="../../images/lec04/10.png" width="70%">
+<figcaption>
+NetAdapt
+</figcaption>
+</center>
+<p>NetAdapt의 전체적인 과정은 아래와 같이 진행된다. 기존 모델에서 각 layer를 <strong>Latency Constraint</strong>에 도달하도록 Pruning하면서 Accuracy(<span class="math inline">\(Acc_A\)</span>등)을 반복적으로 측정한다.</p>
 <ol type="1">
-<li>각 layer의 pruning ratio를 조절</li>
-<li>Short-term fine tuning</li>
-<li>Latency Constraint에 도달했는지 확인</li>
-<li>도달했다면 최적의 pruning ratio로 판단</li>
-<li>각 layer의 최적 pruning ratio가 정해졌다면 마지막 long-term fine tuning을 진행</li>
+<li>각 layer의 pruning ratio를 조절한다.</li>
+<li><code>Short-term</code> fine tuning을 진행한다.</li>
+<li><strong>Latency Constraint</strong>에 도달했는지 확인한다.</li>
+<li><strong>Latency Constraint</strong> 도달하면 해당 layer의 최적의 Pruning ratio로 판단한다.</li>
+<li>각 layer의 최적 Pruning ratio가 정해졌다면 마지막으로 <code>Long-term</code> fine tuning을 진행한다.</li>
 </ol>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../../images/lec04/11-1708245565699-12.png" class="img-fluid figure-img"></p>
-<figcaption>11</figcaption>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../../images/lec04/12.png" class="img-fluid figure-img"></p>
-<figcaption>12</figcaption>
-</figure>
-</div>
+<center>
+<img src="../../images/lec04/11-1708245565699-12.png" width="100%">
+<figcaption>
+NetAdapt 과정
+</figcaption>
+</center>
+<p>이와 같이 NetAdapt의 과정을 진행하면 아래와 같은 실험 결과를 볼 수 있다. Uniform하게 Pruning을 진행한 <code>Multipilers</code>보다 <code>NetAdapt</code>가 1.7x 더 빠르고 오히려 Accuracy는 약 0.3% 정도 높은 것을 알 수 있다.</p>
+<center>
+<img src="../../images/lec04/12.png" width="100%">
+<figcaption>
+NetAdapt의 Latency / Top-1 Accuracy 그래프
+</figcaption>
+</center>
 </section>
 </section>
 <section id="fine-tuningtrain" class="level2">
 <h2 class="anchored" data-anchor-id="fine-tuningtrain">2. Fine-tuning/Train</h2>
-<p>Prunned 모델의 퍼포먼스를 향상하기 위해서는 pruning를 진행하고 나서 Fine-tuning과정이 필요하다.</p>
+<p>Prunned 모델의 퍼포먼스를 향상하기 위해서는 Pruning를 진행하고 나서 <strong>Fine-tuning</strong> 과정이 필요하다.</p>
 <section id="iterative-pruning" class="level3">
 <h3 class="anchored" data-anchor-id="iterative-pruning">2.1 Iterative Pruning</h3>
-<p>보통 Pruned 모델의 Fine-tuning 과정에서는 기존에 학습했던 learning rate보다 작은 rate를 사용한다. 예)1/100 또는 1/10 Pruning 과정과 Fine-tuning 과정은 단발성으로 진행하기보다 점차적으로 pruning ratio를 늘려가며 pruning, fine-tuning을 번갈아가며 진행하는게 더 좋다</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../../images/lec04/13.png" class="img-fluid figure-img"></p>
-<figcaption>13</figcaption>
-</figure>
-</div>
+<p>보통 Pruned 모델의 Fine-tuning 과정에서는 기존에 학습했던 learning rate보다 작은 rate를 사용한다. 예를들어 기존의 모델을 학습할 때 사용한 learning rate의 <span class="math inline">\(1/100\)</span> 또는 <span class="math inline">\(1/10\)</span>을 사용한다. 또한 Pruning 과정과 Fine-tuning 과정은 1번만 진행하기보다 점차적으로 pruning ratio를 늘려가며 Pruning, Fine-tuning을 번갈아가며 여러번 진행하는게 더 좋다.</p>
+<center>
+<img src="../../images/lec04/13.png" width="100%">
+<figcaption>
+Iterative Pruning + Fine-tuning 비교 그래프
+</figcaption>
+</center>
 </section>
 <section id="regularization" class="level3">
 <h3 class="anchored" data-anchor-id="regularization">2.2 Regularization</h3>
-<ul>
-<li>가능한 많은 0 weights</li>
-<li>작은 값의 weights들이 될 수 있도록 - 다음 layer들을 거치면서 0이 될 가능성 ↑</li>
-</ul>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../../images/lec04/14.png" class="img-fluid figure-img"></p>
-<figcaption>14</figcaption>
-</figure>
-</div>
+<p>TinyML의 목표는 <strong>가능한 많은 weight들을 0으로 만드는 것</strong>으로 생각할 수 있다. 그래야 모델을 <em>가볍게</em> 만들 수 있기 때문이다. 그래서 Regularization 기법을 이용해서 모델의 weight들을 0으로, 혹은 0과 가깝게 작은 값을 가지도록 만든다. 작은 값의 weight가 되도록 하는 이유는 0과 가까운 작은 값들은 다음 layer들로 넘어가면서 <strong>0이 될 가능성이 높아지기 때문</strong>이다. 기존의 딥러닝 모델들의 과적합(Overfitting)을 막기 위한 Regularization 기법들과 다르지 않으나 의도와 목적은 다른 것을 짚어볼 수 있다.</p>
+<center>
+<img src="../../images/lec04/14.png" width="60%">
+<figcaption>
+Pruning을 위한 Regularization
+</figcaption>
+</center>
 </section>
 <section id="the-lottery-ticket-hypothesis" class="level3">
 <h3 class="anchored" data-anchor-id="the-lottery-ticket-hypothesis">2.3 The Lottery Ticket Hypothesis</h3>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../../images/lec04/15.png" class="img-fluid figure-img"></p>
-<figcaption>15</figcaption>
-</figure>
-</div>
-<pre><code>프루닝은 훈련 전에도 수행될 수 있습니다. 이 기술에서는 훈련이 시작되기 전에 가중치가 무작위로 초기화됩니다. 일정 비율의 가중치가 무작위로 프루닝됩니다. 프루닝된 가중치는 훈련 중에 0으로 유지됩니다. 이 초기화에서의 프루닝(Pruning at Initialization, PAT)은 "로터리 티켓 가설"에 의해 영감을 받았습니다. 이 가설은 큰 규모의 무작위로 초기화된 네트워크 내에 처음부터 독립적으로 훈련될 경우 전체 네트워크와 비교할 수 있는 성능을 달성할 수 있는 더 작은 하위 네트워크("winning tickets")가 존재할 수 있다고 제안합니다.</code></pre>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../../images/lec04/16.png" class="img-fluid figure-img"></p>
-<figcaption>16</figcaption>
-</figure>
-</div>
+<p>2019년 ICLR에서 발표된 <a href="https://arxiv.org/abs/1803.03635">논문</a>에서 Jonathan Frankle과 Michael Carbin이 소개한 <strong>The Lottery Ticket Hypothesis(LTH)</strong>은 심층 신경망(DNN) 훈련에 대한 흥미로운 아이디어를 제안한다. 무작위로 초기화된 대규모 신경망 내에 더 작은 하위 네트워크(<code>Winning Ticket</code>)가 존재한다는 것을 말한다. 이 하위 네트워크는 처음부터 별도로 훈련할 때 원래 네트워크의 성능에 도달하거나 능가할 수 있다. 이 가설은 이러한 <code>Winning Ticket</code>이 학습하는 데 <strong>적합한 초기 가중치</strong>를 갖는다고 가정한다.</p>
+<center>
+<img src="../../images/lec04/16.png" width="90%">
+<figcaption>
+LTH 설명 그림
+</figcaption>
+</center>
 </section>
 </section>
 <section id="system-support-for-sparsity" class="level2">
 <h2 class="anchored" data-anchor-id="system-support-for-sparsity">3. System Support for Sparsity</h2>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../../images/lec04/17.png" class="img-fluid figure-img"></p>
-<figcaption>17</figcaption>
-</figure>
-</div>
-<p>DNN을 가속화 시키는 방법은 크게 3가지, Sparse Weight, Sparse Activation, Weight Sharing이 있다.</p>
+<p>DNN을 가속화 시키는 방법은 크게 3가지, <strong>Sparse Weight</strong>, <strong>Sparse Activation</strong>, <strong>Weight Sharing</strong>이 있다. <strong>Sparse Weight</strong>, <strong>Sparse Activation</strong>은 Pruning이고 <strong>Weight Sharing</strong>은 Quantization의 방법이다.</p>
+<center>
+<img src="../../images/lec04/22.png" width="80%">
+<figcaption>
+DNN을 가속화 시키는 방법
+</figcaption>
+</center>
+<ol type="1">
+<li><strong>Sparse Weight</strong>: Weight를 Pruning하여 Computation은 Pruning Ratio에 대응하여 빨라진다. 하지만 Memory는 Pruning된 weight의 위치를 기억하기 위한 memory 용량이 필요하므로 Pruning Ratio에 비례하여 줄진 않는다.</li>
+<li><strong>Sparse Activation</strong>: Weight를 Pruning하는 것과 다르게 Activation은 Test Input에 따라 <strong>dynamic</strong> 하므로 Weight를 Pruning하는 것보다 Computation이 덜 줄어든다.</li>
+<li><strong>Weight Sharing</strong>: Quantization 방법으로 32-bit data를 4-bit data로 변경함으로써 8배의 memory 절약을 할 수 있다.</li>
+</ol>
 <section id="eie" class="level3">
 <h3 class="anchored" data-anchor-id="eie">3.1 EIE</h3>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../../images/lec04/18.png" class="img-fluid figure-img"></p>
-<figcaption>18</figcaption>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../../images/lec04/19.png" class="img-fluid figure-img"></p>
-<figcaption>19</figcaption>
-</figure>
-</div>
-<p>여기서</p>
+<p><strong>E</strong>fficient <strong>I</strong>nference <strong>E</strong>ngine은 기계 학습 모델을 실시간으로 실행하기 위해 최적화된 소프트웨어 라이브러리나 프레임워크를 말한다. Processing Elements(PE)의 구조</p>
+<center>
+<img src="../../images/lec04/18.png" width="80%">
+<figcaption>
+PE 연산 Logically / Physically 분석
+</figcaption>
+</center>
+<p>아래 그림에서 Input별(<span class="math inline">\(\vec{a}\)</span>) 연산은 아래와 같이 Input이 0일 때는 skip되고 0이 아닐 때는 prunning 되지 않은 weight와 연산이 진행된다.</p>
+<center>
+<img src="../../images/lec04/19.png" width="80%">
+<figcaption>
+Input별 연산 과정
+</figcaption>
+</center>
+<p>EIE 실험은 가장 loss가 적은 data 자료형인 16 bit Int형을 사용했다.(0.5% loss) <code>AlexNet</code>이나 <code>VGG</code>와 같이 ReLU Activation이 많이 사용되는 모델들은 경량화가 많이 된 반면, RNN와 LSTM이 사용된 <code>NeuralTalk</code> 모델들 같은 경우에는 ReLU를 사용하지 않아 경량화될 수 있는 부분이 없어 Activation Density가 100%인 것을 확인할 수 있다.</p>
+<center>
+<img src="../../images/lec04/23.png" width="90%">
+<figcaption>
+EIE 실험 결과
+</figcaption>
+</center>
 </section>
-<section id="mn" class="level3">
-<h3 class="anchored" data-anchor-id="mn">3.2 M:N</h3>
+<section id="mn-weight-sparsity" class="level3">
+<h3 class="anchored" data-anchor-id="mn-weight-sparsity">3.2 M:N Weight Sparsity</h3>
+<p>이 방법은 Nvidia 하드웨어의 지원이 필요한 방법으로 보통 2:4 Weight Sparsity를 사용한다. 왼쪽의 Sparse Matrix를 재배치해서 <strong>Non-zero data matrix</strong>와 인덱스를 저장하는 <strong>Index matrix</strong>를 따로 만들어서 저장한다.</p>
+<center>
+<img src="../../images/lec04/24.png" width="90%">
+<figcaption>
+2:4 Weight Sparsity
+</figcaption>
+</center>
+<p>M:N Weight Sparsity 적용하지 않은 Dense GEMM과 적용한 Sparse GEMM을 계산할 때는 아래의 그림과 같은 과정으로 연산이 진행된다.</p>
+<center>
+<img src="../../images/lec04/25.png" width="90%">
+<figcaption>
+Dense VS. Sparse GEMM
+</figcaption>
+</center>
 </section>
-<section id="sparsecnn" class="level3">
-<h3 class="anchored" data-anchor-id="sparsecnn">3.3 SparseCNN</h3>
+<section id="sparse-convolution" class="level3">
+<h3 class="anchored" data-anchor-id="sparse-convolution">3.3 Sparse Convolution</h3>
+<p>Submanifold Sparse Convolutional Networks (SSCN)은 고차원 데이터에서 효율적인 계산을 가능하게 하는 신경망 아키텍처의 한 형태이. 이 기술은 특히 3D 포인트 클라우드 또는 고해상도 이미지와 같이 대규모 및 고차원 데이터를 처리할 때 중요하다. SSCN의 핵심 아이디어는 데이터의 희소성(sparcity)을 활용하여 계산과 메모리 사용량을 크게 줄이는 것이다.</p>
+<center>
+<img src="../../images/lec04/27.png" width="90%">
+<figcaption>
+출처: Submanifold Sparse Convolutional Networks
+</figcaption>
+</center>
+<p>이러한 <strong>Sparse Convolution</strong>은 기본 Convolution과 비교했을 때 아래 그림과 같이 나타내볼 수 있다.</p>
+<center>
+<img src="../../images/lec04/26.png" width="90%">
+<figcaption>
+Conventional VS. Sparse Convolution
+</figcaption>
+</center>
+<p>연산 과정을 비교해보기 위해 Input Point Cloud(<span class="math inline">\(P\)</span>), Feature Map(<span class="math inline">\(W\)</span>), Ouput Point Cloud(<span class="math inline">\(Q\)</span>)를 아래와 같이 있다고 하자. 기존의 Convolution과 Sparse Convolution을 비교해보면 연산량이 9:2로 매우 적은 연산만 필요한 것을 알 수 있다.</p>
+<center>
+<img src="../../images/lec04/28.png" width="90%">
+<figcaption>
+Conventional VS. Sparse 연산량 비교
+</figcaption>
+</center>
+<p>Feature Map(<span class="math inline">\(W\)</span>)을 기준으로 각 weight 마다 필요한 Input data의 크기가 다르다. 예를 들어 <span class="math inline">\(W_{-1, 0}\)</span>은 <span class="math inline">\(P1\)</span>과 만의 연산이 진행되므로 <span class="math inline">\(P1\)</span>만 연산시 불러내게 된다.</p>
+<center>
+<img src="../../images/lec04/29.png" width="90%">
+<figcaption>
+Sparse Convolution 계산 과정
+</figcaption>
+</center>
+<p>따라서 Feature Map의 <span class="math inline">\(W\)</span>에 따라 필요한 Input data를 표현하고 따로 computation을 진행하면 아래와 같이 고르지 못한 연산량 분배가 진행되는데(왼쪽 그림) 이는 computation에 overhead는 없지만 regularity가 좋지 않다. 또는 가장 computation que가 긴 것을 기준으로 Batch 단위로 계산하게 된다면(가운데 그림) overhead가 생긴다. 따라서 적절히 비슷한 연산량을 가지는 grouping을 진행한 뒤 batch로 묶으면 적절히 computation을 진행할 수 있다.</p>
+<center>
+<img src="../../images/lec04/31.png" width="90%">
+<figcaption>
+Grouping Computation
+</figcaption>
+</center>
+<p>이런 Grouping을 적용한 후 Sparse Convolution을 진행하면 아래와 같은 과정으로 표현할 수 있다.</p>
+<center>
+<img src="../../images/lec04/30.png" width="90%">
+<figcaption>
+Sparse Convolution 예시
+</figcaption>
+</center>
+<p>2023년도 강의에서 마지막 Sparse Convolution에 대해 설명이 많이 생략되어 있으므로, 좀 더 자세한 내용은 <a href="https://youtu.be/IIh4EwmcLUs?si=75qjjSn1LAXfNrEx">Youtube 발표 영상</a>이나 <a href="https://youtu.be/1njtOcYNAmg?si=inA-BR6cylJpuuys">2022년도 강의</a>를 참고하는 것을 권장한다.</p>
 </section>
 </section>
 <section id="reference" class="level2">
 <h2 class="anchored" data-anchor-id="reference">4. Reference</h2>
 <ul>
-<li><a href="https://www.youtube.com/watch?v=w5WiUcDJosM&amp;list=PL80kAHvQbh-pT4lCkDT53zT8DKmhE0idB&amp;index=5">MIT-TinyML-lecture03-Pruning-1</a></li>
-<li><a href="https://tulip-phalange-a1e.notion.site/LLM-Inference-HW-SW-Optimizations-827ac8f45d734f00af369ef7492f8d45">LLM Inference - HW/SW Optimizations</a></li>
+<li><a href="https://youtu.be/95JFZPoHbgQ?si=2cAXYhy0hRSZrHaL">MIT-TinyML-lecture04-Pruning-2</a></li>
 <li><a href="https://arxiv.org/pdf/1802.03494.pdf">AMC: Automl for Model Compression and Acceleration on Mobile Devices, 2018</a></li>
 <li><a href="https://arxiv.org/abs/1509.02971">Continuous control with deep reinforcement learning</a></li>
 <li><a href="https://kimbg.tistory.com/26">FLOPs란? 딥러닝 연산량에 대해서</a></li>
+<li><a href="https://arxiv.org/abs/1804.03230">NetAdapt: Platform-Aware Neural Network Adaptation for Mobile Applications</a></li>
+<li><a href="https://arxiv.org/abs/1803.03635">The Lottery Ticket Hypothesis: Finding Sparse, Trainable Neural Networks</a></li>
+<li><a href="https://ysbsb.github.io/pruning/2020/04/21/Lottery-ticket-hypothesis.html">The Lottery Ticket Hypothesis Finding Sparse, Trainable Neural Networks 논문 리뷰</a></li>
+<li><a href="https://tulip-phalange-a1e.notion.site/LLM-Inference-HW-SW-Optimizations-827ac8f45d734f00af369ef7492f8d45">LLM Inference - HW/SW Optimizations</a></li>
+<li><a href="https://arxiv.org/abs/2104.08378">Accelerating Sparse Deep Neural Networks</a></li>
+<li><a href="https://arxiv.org/abs/1706.01307">Submanifold Sparse Convolutional Networks</a></li>
+<li><a href="https://arxiv.org/abs/2204.10319">TorchSparse: Efficient Point Cloud Inference Engine</a></li>
+<li><a href="https://dl.acm.org/doi/10.1145/3613424.3614303">TorchSparse++: Efficient Training and Inference Framework for Sparse Convolution on GPUs</a></li>
+<li><a href="https://github.com/mit-han-lab/torchsparse">mit-han-lab/torchsparse</a></li>
+<li><a href="https://youtu.be/IIh4EwmcLUs?si=75qjjSn1LAXfNrEx">MLSys’22 TorchSparse: Efficient Point Cloud Inference Engine</a></li>
 </ul>
 
 
