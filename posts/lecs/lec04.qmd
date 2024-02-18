@@ -241,7 +241,7 @@ M:N Weight Sparsity 적용하지 않은 Dense GEMM과 적용한 Sparse GEMM을 �
 
 ### 3.3 Sparse Convolution
 
-Submanifold Sparse Convolutional Networks (SSCN)은 고차원 데이터에서 효율적인 계산을 가능하게 하는 신경망 아키텍처의 한 형태이. 이 기술은 특히 3D 포인트 클라우드 또는 고해상도 이미지와 같이 대규모 및 고차원 데이터를 처리할 때 중요하다. SSCN의 핵심 아이디어는 데이터의 희소성(sparcity)을 활용하여 계산과 메모리 사용량을 크게 줄이는 것이다.
+**Submanifold Sparse Convolutional Networks (SSCN)**은 고차원 데이터에서 효율적인 계산을 가능하게 하는 신경망 아키텍처의 한 형태이다. 이 기술은 특히 3D 포인트 클라우드 또는 고해상도 이미지와 같이 대규모 및 고차원 데이터를 처리할 때 중요하다. SSCN의 핵심 아이디어는 데이터의 Sparcity을 활용하여 계산과 메모리 사용량을 크게 줄이는 것이다.
 
 <center>
 <img src="../../images/lec04/27.png" width="90%" />
@@ -269,21 +269,21 @@ Feature Map($W$)을 기준으로 각 weight 마다 필요한 Input data의 크�
 <figcaption>Sparse Convolution 계산 과정</figcaption>
 </center>
 
-따라서 Feature Map의 $W$에 따라 필요한 Input data를 표현하고 따로 computation을 진행하면 아래와 같이 고르지 못한 연산량 분배가 진행되는데(왼쪽 그림) 이는 computation에 overhead는 없지만 regularity가 좋지 않다. 또는 가장 computation que가 긴 것을 기준으로 Batch 단위로 계산하게 된다면(가운데 그림) overhead가 생긴다. 따라서 적절히 비슷한 연산량을 가지는 grouping을 진행한 뒤 batch로 묶으면 적절히 computation을 진행할 수 있다.
+따라서 Feature Map의 $W$에 따라 필요한 Input data를 표현하고 따로 computation을 진행하면 아래와 같이 고르지 못한 연산량 분배가 진행되는데(왼쪽 그림) 이는 computation에 overhead는 없지만 regularity가 좋지 않다. 또는 가장 computation이 많은 것을 기준으로 Batch 단위로 계산하게 된다면(가운데 그림) 적은 computation weight에서의 비효율적인 계산 대기시간이 생기므로 overhead가 생긴다. 따라서 적절히 비슷한 연산량을 가지는 grouping을 진행한 뒤 batch로 묶으면 적절히 computation을 진행할 수 있다.(오른쪽 그림)
 
 <center>
 <img src="../../images/lec04/31.png" width="90%" />
 <figcaption>Grouping Computation</figcaption>
 </center>
 
-이런 Grouping을 적용한 후 Sparse Convolution을 진행하면 아래와 같은 과정으로 표현할 수 있다.
+이런 Grouping을 적용한 후 Sparse Convolution을 진행하면 **Adaptive Grouping**이 적용되어 아래와 같이 진행된다.
 
 <center>
 <img src="../../images/lec04/30.png" width="90%" />
 <figcaption>Sparse Convolution 예시</figcaption>
 </center>
 
-2023년도 강의에서 마지막 Sparse Convolution에 대해 설명이 많이 생략되어 있으므로, 좀 더 자세한 내용은 [Youtube 발표 영상](https://youtu.be/IIh4EwmcLUs?si=75qjjSn1LAXfNrEx)이나 [2022년도 강의](https://youtu.be/1njtOcYNAmg?si=inA-BR6cylJpuuys)를 참고하는 것을 권장한다.
+여기까지가 2023년도 강의에서 마지막 Sparse Convolution에 대해 설명한 부분을 정리한 부분이다. 하지만 강의에서 설명이 많이 생략되어 있으므로 좀 더 자세한 내용은 [Youtube 발표 영상](https://youtu.be/IIh4EwmcLUs?si=75qjjSn1LAXfNrEx)이나 [2022년도 강의](https://youtu.be/1njtOcYNAmg?si=inA-BR6cylJpuuys)를 참고하는 것을 권장한다.
 
 
 ## 4. Reference
