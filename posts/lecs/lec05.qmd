@@ -2,9 +2,9 @@
 toc: true
 title: "🧑‍🏫 Lecture 5-6"
 description:  Quantization
-author: "Seunghyun Oh(ooshyun)"
+author: "Seunghyun Oh"
 date: "2024-03-05"
-categories: [Quantization, TinyML, lecture]
+categories: [lecture, quantization]
 ---
 <style>
 p {
