@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.549">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Seunghyun Oh">
+<meta name="dcterms.date" content="2024-03-19">
+<meta name="description" content="Knowledge Distillation(KD)">
+
+<title>TinyML KOR - 🧑‍🏫 Lecture 9</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">TinyML KOR</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">TinyML Study Group</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#what-is-knowledge-distillation" id="toc-what-is-knowledge-distillation" class="nav-link active" data-scroll-target="#what-is-knowledge-distillation">1. What is Knowledge Distillation?</a></li>
+  <li><a href="#what-to-match-between-teacher-and-student-network" id="toc-what-to-match-between-teacher-and-student-network" class="nav-link" data-scroll-target="#what-to-match-between-teacher-and-student-network">2. What to match between Teacher and Student Network?</a>
+  <ul class="collapse">
+  <li><a href="#output-logits" id="toc-output-logits" class="nav-link" data-scroll-target="#output-logits">2.1 Output logits</a></li>
+  <li><a href="#intermediate-weights" id="toc-intermediate-weights" class="nav-link" data-scroll-target="#intermediate-weights">2.2 Intermediate weights</a></li>
+  <li><a href="#intermediate-features" id="toc-intermediate-features" class="nav-link" data-scroll-target="#intermediate-features">2.3 Intermediate features</a></li>
+  <li><a href="#gradients" id="toc-gradients" class="nav-link" data-scroll-target="#gradients">2.4 Gradients</a></li>
+  <li><a href="#sparsity-patterns" id="toc-sparsity-patterns" class="nav-link" data-scroll-target="#sparsity-patterns">2.5 Sparsity patterns</a></li>
+  <li><a href="#relational-information-different-layers" id="toc-relational-information-different-layers" class="nav-link" data-scroll-target="#relational-information-different-layers">2.6.1 Relational information: Different Layers</a></li>
+  <li><a href="#relational-information-different-samples" id="toc-relational-information-different-samples" class="nav-link" data-scroll-target="#relational-information-different-samples">2.6.1 Relational information: Different Samples</a></li>
+  </ul></li>
+  <li><a href="#self-and-online-distillation" id="toc-self-and-online-distillation" class="nav-link" data-scroll-target="#self-and-online-distillation">3. Self and Online Distillation</a>
+  <ul class="collapse">
+  <li><a href="#self-distillation" id="toc-self-distillation" class="nav-link" data-scroll-target="#self-distillation">3.1 Self Distillation</a></li>
+  <li><a href="#online-distillation" id="toc-online-distillation" class="nav-link" data-scroll-target="#online-distillation">3.2 Online Distillation</a></li>
+  <li><a href="#combined-distillation" id="toc-combined-distillation" class="nav-link" data-scroll-target="#combined-distillation">3.3 Combined Distillation</a></li>
+  </ul></li>
+  <li><a href="#distillation-for-different-tasks" id="toc-distillation-for-different-tasks" class="nav-link" data-scroll-target="#distillation-for-different-tasks"><strong>4. Distillation for different tasks</strong></a>
+  <ul class="collapse">
+  <li><a href="#object-detection" id="toc-object-detection" class="nav-link" data-scroll-target="#object-detection">4.1 Object Detection</a></li>
+  <li><a href="#semantic-segmentation" id="toc-semantic-segmentation" class="nav-link" data-scroll-target="#semantic-segmentation">4.2 Semantic Segmentation</a></li>
+  <li><a href="#gan" id="toc-gan" class="nav-link" data-scroll-target="#gan">4.3 GAN</a></li>
+  <li><a href="#transformer" id="toc-transformer" class="nav-link" data-scroll-target="#transformer">4.4 Transformer</a></li>
+  </ul></li>
+  <li><a href="#network-augmentation-a-training-technique-for-tiny-machine-learning-models." id="toc-network-augmentation-a-training-technique-for-tiny-machine-learning-models." class="nav-link" data-scroll-target="#network-augmentation-a-training-technique-for-tiny-machine-learning-models.">5. Network Augmentation, <strong>a training technique for tiny machine learning models.</strong></a>
+  <ul class="collapse">
+  <li><a href="#network-augmentation" id="toc-network-augmentation" class="nav-link" data-scroll-target="#network-augmentation">5.2 Network Augmentation</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">🧑‍🏫 Lecture 9</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">lecture</div>
+    <div class="quarto-category">knowledge distillation</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Knowledge Distillation(KD)
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Seunghyun Oh </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 19, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<style>
+p {
+  line-height: 2; /* Adjust the line-height property as needed */
+  text-align: justify;
+  text-justify: inter-word; /* Adjust the justification mode as needed */
+}
+
+.image-container {
+  text-align: center; /* Center-align the contents horizontally */
+}
+
+.centered-text {
+  text-align: center; /* Center-align the text within the container */
+}
+</style>
+<p>이번 시간은 Knowledge Distillation 기법에 대해서 이야기 해볼까 해요. 지금까지 <strong>작은 크기의 모델을 만드는 방법에 대해서</strong> 알아봤지만, 여전히 작은 모델은 성능적으로 부족한 점이 많죠. 성능을 개선시키는 다른 방법에 대해서 고민하다가 <strong>“크기가 큰 모델을 이용해보자.”</strong> 에서 나온 아이디어가 바로 Knowledge Distillation 입니다.</p>
+<section id="what-is-knowledge-distillation" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-knowledge-distillation">1. What is Knowledge Distillation?</h2>
+<p>Knowledge Distillation은 간단하게 Teach Network라고 불리는 크기가 큰 모델이 있어요. 이 Teacher Network가 먼저 Training을 합니다. 그런 다음 오늘의 주인공 <strong>Student Network</strong>로 불리는 크기가 작은 모델이 있죠. 이 모델은 두 가지 방식으로 학습을 하는데, 첫 번째는 기존에 학습하던 대로 Target 데이터로부터 학습이 있구요. 다른 한 가지는 <strong>Teacher Network</strong>를 따라가는 학습이 있습니다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. Knowledge Distillation: A Survey [Gou&nbsp;et al., IJCV 2020]</figcaption>
+</figure>
+</div>
+<ul>
+<li>The goal of knowledge distillation is to align the class probability distributions from teacher and student networks.</li>
+</ul>
+<p>그럼 궁금한 점이 <strong>Teacher Network에 어떤 점을 배워야할까요?</strong> 강의에서는 총 6개로 Output logit, Intermediate weight, Intermediate feature, Gradient, Sparsity pattern, Relational information으로 나눠서 설명합니다. 설명하기에 앞서서 개념하나 소개하고 넘어갈께요.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 1.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. MIT-TinyML-lecture10-Knowledge-Distillation in <a href="https://efficientml.ai/">https://efficientml.ai</a></figcaption>
+</figure>
+</div>
+<p>만약 위 Teacher Network가 학습한 결과(T=1)로 고양이 사진일 확률 0.982, 강아지 사진일 확률이 0.017이라고 합시다. 그럼 Student Network는 Output logit을 학습한다고 가정하면, 이 두 확률을 따라 갈겁니다. 하지만 Student Network에 따라 이 수치까지 학습하기 어려울 수 있습니다. 이 때 “<strong>Temperature(T)</strong>”이라는 개념을 들여와 Teacher Network의 Cat과 Dog에 대한 확률을 좀 더 Smooth하게 만들죠.</p>
+<p><span class="math display">\[
+p(z_i,T) = \dfrac{exp(z_j/T)}{\sum_j exp(z_j/T)}
+\]</span></p>
+<p>식으로 쓰면 위와 같이 될텐데, <strong>보통은 1로 두고</strong> 한다고 강의에서 언급합니다. 왜 설명했냐구요? 혹시나 개념이 나오면 이해하시기 편하시라구요🙂&nbsp;그럼, <strong>Teacher Network에서 어떤 부분을 Student Network에 학습시킬지</strong> 알아보시죠.</p>
+</section>
+<section id="what-to-match-between-teacher-and-student-network" class="level2">
+<h2 class="anchored" data-anchor-id="what-to-match-between-teacher-and-student-network">2. What to match between Teacher and Student Network?</h2>
+<section id="output-logits" class="level3">
+<h3 class="anchored" data-anchor-id="output-logits">2.1 Output logits</h3>
+<p>첫 번째는 Output logit입니다. loss로는 대표적으로 Cross entropy loss와 L2 loss가 있겠죠.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 2.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. MIT-TinyML-lecture10-Knowledge-Distillation in <a href="https://efficientml.ai/">https://efficientml.ai</a></figcaption>
+</figure>
+</div>
+</section>
+<section id="intermediate-weights" class="level3">
+<h3 class="anchored" data-anchor-id="intermediate-weights">2.2 Intermediate weights</h3>
+<p>두 번째는 Layer마다 Weight입니다. 하지만 <strong>Student Model은 Weight dimesion이 다를 수 밖에 없는데</strong>, 그럼 Linear Transformation을 이용해서 Dimension을 맞춰 학습하면 되겠네요.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 3.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. MIT-TinyML-lecture10-Knowledge-Distillation in <a href="https://efficientml.ai/">https://efficientml.ai</a></figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 4.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. MIT-TinyML-lecture10-Knowledge-Distillation in <a href="https://efficientml.ai/">https://efficientml.ai</a></figcaption>
+</figure>
+</div>
+<p>스터디 중에 나온 질문이 “그럼 Student Network에서 추가적인 레이어가 생기는데, 작게 만드는 의미가 없지 않느냐?” 였습니다. 제 생각은 Weight Dimension을 맞추기 위한 Linear Transformation을 위한 레이어는 추론시 사용하지 않을 수 있으니, Student Network의 성능을 높이기 더 제격아닐까요? 마치 추론 때 필요한 부품만 조립하듯 말이죠.</p>
+</section>
+<section id="intermediate-features" class="level3">
+<h3 class="anchored" data-anchor-id="intermediate-features">2.3 Intermediate features</h3>
+<p>세 번째는 Feature 입니다. 이전 경우가 Weight라고 하면, 이번은 Layer의 Output입니다. Teach Network과 Student Network의 Feature를 같게 학습시키는 방법은 여러가지가 있는데, 여기서는 Cosine of angle로 학습을 시키는 방법(<a href="https://arxiv.org/pdf/1707.01219.pdf">Like What You Like: Knowledge Distill via Neuron Selectivity Transfer [Huang and Wang, arXiv 2017]</a>) 과 Dimension을 줄여서 학습을 시키는 방법(<a href="https://arxiv.org/pdf/1802.04977.pdf">Paraphrasing Complex Network: Network Compression via Factor Transfer [Kim&nbsp;<em>et al.</em>, NeurIPS 2018]</a>)을 소개합니다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 5.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. Like What You Like: Knowledge Distill via Neuron Selectivity Transfer [Huang and Wang, arXiv 2017]</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 6.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. Paraphrasing Complex Network: Network Compression via Factor Transfer [Kim&nbsp;<em>et al.</em>, NeurIPS 2018]</figcaption>
+</figure>
+</div>
+<ul>
+<li>The paraphraser shrinks the output teacher feature map from m dimensions to m x k dimensions (called <strong>factor</strong> typically k=0.5) and then expands the dimensionality back to m.</li>
+<li>The output of paraphraser is supervised with a reconstruction loss against the original m-dimensional output.</li>
+<li>Student uses one layer of MLP to obtain a <strong>factor</strong> with the same dimensionality of m x k.</li>
+<li>FT minimizes the distance between teacher and student factors.</li>
+</ul>
+</section>
+<section id="gradients" class="level3">
+<h3 class="anchored" data-anchor-id="gradients">2.4 Gradients</h3>
+<p>네 번째는 Gradient 입니다. Gradient를 시각적으로 볼 수 있는 방법에는 Attention Map이 있는데요, 이 Attention Map은 이미지에서 특징적인 부분을 잡아낼 수 있죠.</p>
+<ul>
+<li>Reference: Paying More Attention to Attention: Improving the Performance of Convolutional Neural Networks via Attention Transfer [Zagoruyko and Komodakis, ICLR 2017]</li>
+<li>Gradients of feature maps are used to characterize attention of DNNs</li>
+<li>The attention of a CNN feature map <span class="math inline">\(x\)</span> is defined as <span class="math inline">\(\dfrac{\partial L}{\partial x}\)</span>, where <span class="math inline">\(L\)</span> is the learning objective.</li>
+<li>Intuition: If <span class="math inline">\(\dfrac{\partial L}{\partial x_{i,j}}\)</span> is large, a small perturbation at <span class="math inline">\(i,j\)</span> will significantly impact the final output. As a result, the network is putting more attention on position <span class="math inline">\(i, j\)</span></li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 7.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. MIT-TinyML-lecture10-Knowledge-Distillation in <a href="https://efficientml.ai/">https://efficientml.ai</a></figcaption>
+</figure>
+</div>
+<p>아래 그림은 <strong>“Attention Map이 모델의 성능이 높다면 비슷한 패턴으로 나온다.”</strong> 는 예시로 나옵니다. Resnet34와 ResNet101의 Attention Map은 유사하게 보이는 반면 NIN인 경우는 많이 다른 것을 확인 할 수 있습니다.</p>
+<ul>
+<li><p>Performant models have similar attention maps</p>
+<p>Attention makes of performant ImageNet models (ResNets) are indeed similar to each other, but the less performant model(NIN) has quite different attention maps</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 8.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. MIT-TinyML-lecture10-Knowledge-Distillation in <a href="https://efficientml.ai/">https://efficientml.ai</a></figcaption>
+</figure>
+</div></li>
+</ul>
+</section>
+<section id="sparsity-patterns" class="level3">
+<h3 class="anchored" data-anchor-id="sparsity-patterns">2.5 Sparsity patterns</h3>
+<p>다섯 번째는 Sparsity Pattern 입니다. Layer마다 Output Acitivation을 같게 만드는 방법인데, Intermediate Feature와 유사하게 보이네요.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 9.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. Knowledge Transfer via Distillation of Activation Boundaries Formed by Hidden Neurons [Heo&nbsp;<em>et al.</em>, AAAI 2019]</figcaption>
+</figure>
+</div>
+<ul>
+<li><p>Intuition: the teacher and student networks should have similar sparsity patterns after the ReLU activation. A neuron is activated after ReLU if its value is larger than 0, denoted by the indicator function <span class="math inline">\(\rho(x) = 1 [x&gt;0]\)</span>.</p></li>
+<li><p>We want to minimize <span class="math inline">\(\mathscr{L}(I) = \lvert\lvert \rho(T(I))-\rho(S(I)) \lvert\lvert_1\)</span>, where <span class="math inline">\(S\)</span> and <span class="math inline">\(T\)</span> corresponds to student and teacher networks, respectively</p></li>
+</ul>
+</section>
+<section id="relational-information-different-layers" class="level3">
+<h3 class="anchored" data-anchor-id="relational-information-different-layers">2.6.1 Relational information: Different Layers</h3>
+<p>마지막으로 모델내에서 나오는 텐서의 상호 연관성에 대해서도 같게 할 수 있다는 방법 두 가지가 나옵니다. 첫 번째는 각 레이어의 입력, 출력 텐서를 Inner product 하게 되면 하나의 Matrix를 얻을 수 있는데, 이 Matrix를 같게 학습시킨다는 아이디어죠.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/KD-related-info.gif" class="img-fluid figure-img"></p>
+<figcaption>Reference: A Gift from Knowledge Distillation: Fast Optimization, Network Minimization and Transfer Learning [Yim&nbsp;<em>et al.</em>, CVPR 2017]</figcaption>
+</figure>
+</div>
+<ol type="1">
+<li><p>Use <strong>inner product to extract relational information</strong> (a matrix of shape <span class="math inline">\(C_{in} \times C_{out}\)</span>, reduction on the spatial dimensions) for both student and teacher networks. *Note: the student and teacher networks only differ in number of layers, not number of channels</p></li>
+<li><p>Then match the resulting <strong>dot products between teacher and student networks</strong> <span class="math inline">\((G_1^T, G_1^S)\)</span></p></li>
+</ol>
+</section>
+<section id="relational-information-different-samples" class="level3">
+<h3 class="anchored" data-anchor-id="relational-information-different-samples">2.6.1 Relational information: Different Samples</h3>
+<p>두 번째는 이전까지 저희는 학습데이터 하나하나마다 나오는 결과를 Teach와 Student를 같게끔 학습시켰는데, 이번엔 <strong>여러 학습데이터에서 나온 여러 Output을 하나의 Matrix 형태</strong>로 닮게 만드는 방법입니다.</p>
+<ul>
+<li><strong>Conventional KD</strong> focuses on matching features / logins <strong>for one input</strong>. <strong>Relation KD</strong> looks at the relations between intermediate features <strong>from multiple inputs.</strong></li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 10.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. Relational Knowledge Distillation [Park&nbsp;<em>et al.</em>, CVPR 2019]</figcaption>
+</figure>
+</div>
+<ul>
+<li><p>Relation between different samples</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 11.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. Relational Knowledge Distillation [Park&nbsp;<em>et al.</em>, CVPR 2019]</figcaption>
+</figure>
+</div></li>
+</ul>
+<p>지금까지 Student Network가 Teacher Network의 어떤 Output을 가지고 학습시킬지에 대해서 알아봤습니다. 그런데 저희가 TinyML을 하는 목적은 사실 <strong>“더 작은 네트워크를 사용해보자.”</strong> 이지 않았나요? 즉, Teacher Network없이 Student Network만으로는 할 수 있는 방법이 없을까요? 이런 생각에서 나온 아이디어가 Self and Online Distillation 입니다.</p>
+</section>
+</section>
+<section id="self-and-online-distillation" class="level2">
+<h2 class="anchored" data-anchor-id="self-and-online-distillation">3. Self and Online Distillation</h2>
+<ul>
+<li>What is the disadvantage of fixed large teachers? Does it have to be the case that we need a fixed large teacher in KD?</li>
+</ul>
+<section id="self-distillation" class="level3">
+<h3 class="anchored" data-anchor-id="self-distillation">3.1 Self Distillation</h3>
+<p>첫 번째 Self Distillation은 구조가 같은 네트워크를 계속해서 복사해 나갑니다. 그러면서 이전에 학습한 네트워크로 부터도 복사된 네트워크가 학습할 수 있도록 하며, k개 만큼 복사하며 학습한 후에 최종 Output으로는 복사한 네트워크들의 Output을 Ensemble한 결과를 이용하죠. 여기서 Accuracy는 k번째로 갈수록 늘어나겠죠?</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 12.png" class="img-fluid figure-img"></p>
+<figcaption>Born-Again Neural Networks [Furlanello et al., ICML 2018]</figcaption>
+</figure>
+</div>
+<ul>
+<li><p>Born-Again Networks generalizes defensive distillation by <strong>adding iterative training states</strong> and <strong>using both classification objective and distillation objective</strong> in subsequent stages.</p></li>
+<li><p>Network architecture <span class="math inline">\(T = S_1=S_2=\dots=S_k\)</span></p></li>
+<li><p>Network accuracy <span class="math inline">\(T &lt; S_1 &lt; S_2 &lt; \dots &lt; S_k\)</span></p></li>
+<li><p>Can alteratively ensemble <span class="math inline">\(T,S_1, S_2, \dots, S_k\)</span> to get even better performance</p></li>
+</ul>
+</section>
+<section id="online-distillation" class="level3">
+<h3 class="anchored" data-anchor-id="online-distillation">3.2 Online Distillation</h3>
+<p>두 번째는 Online Distillation인데, 여기 아이디어는 <strong>“같은 네트워크 구조를 쓰자.”</strong> 입니다. 그리고 Teacher network과 Student network는 처음부타 같이 학습하는데, Loss에 한 가지 항이 추가되죠. 바로 “KL Divergence” 입니다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 13.png" class="img-fluid figure-img"></p>
+<figcaption>Reference: Deep Mutual Learning [Zhang&nbsp;et al., CVPR 2018]</figcaption>
+</figure>
+</div>
+<ul>
+<li><p>Idea: for both teach and student networks, we want to add a distillation objective that minimizes the output distribution of the other party.</p></li>
+<li><p><span class="math inline">\(\mathscr{L}(S) = CrossEntropy(S(I), y)+KL(S(I), T(I))\)</span></p></li>
+<li><p><span class="math inline">\(\mathscr{L}(T) = CrossEntropy(T(I), y)+KL(S(I), T(I))\)</span></p></li>
+<li><p>It is not necessary to retrain <span class="math inline">\(T\)</span> and <span class="math inline">\(S=T\)</span> is allowed</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 14.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. Deep Mutual Learning [Zhang&nbsp;et al., CVPR 2018]</figcaption>
+</figure>
+</div></li>
+</ul>
+</section>
+<section id="combined-distillation" class="level3">
+<h3 class="anchored" data-anchor-id="combined-distillation">3.3 Combined Distillation</h3>
+<p>마지막은 Self 와 Online Distillation을 합친 연구들을 소개할게요.</p>
+<p>첫 번째는 On-the-Fly Native Ensemble 입니다. 구조를 보시면 Branch 마다 모델의 구조도 동일하게 Branch 0, Branch 1, … , Branch m 으로 나뉘는 게 Self Distillation를 보는 듯하죠. 그리고 각 Branch를 학습시 동시에 진행하는 것으로 보이네요.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 15.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. Knowledge Distillation by On-the-Fly Native Ensemble [Lan et al., NeurlPS 2018]</figcaption>
+</figure>
+</div>
+<ul>
+<li><p>Idea: generating <strong>multiple</strong> output probability distributions and <strong>ensemble</strong> them as the target distribution for knowledge distillation.</p></li>
+<li><p>Similar to DML(Deep Mutual Learning), ONE allows the teacher model to be exactly the same as the student model, and it does not require retraining the teach network first. It is also not necessary to train two models as in DML.</p></li>
+<li><p>Result</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 16.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. Knowledge Distillation by On-the-Fly Native Ensemble [Lan et al., NeurlPS 2018]</figcaption>
+</figure>
+</div></li>
+</ul>
+<p>두 번째 연구는 Be Your Own Teacher 라는 연구인데, 여기서는 각 레이어마다 나온 Feature map에 추가적인 레이어를 붙여서 Self Distillation의 방법을 이용합니다. Loss로는 Cross entropy(Output Logit), 추가적으로 붙여서 만든 각 모델마다 KL Divergence, 그리고 intermediate feature를 사용하네요. 흥미로웠던 점은 첫 번째, 두 번째 레이어에서는 성능이 거의 나오지 않을 것 같았는데 두 번째 레이어부터는 Ensemble까지 어느정도 성능이 나오는 것을 결과에서 볼 수 있어요.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 17.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. Be Your Own Teacher: Improve the Performance of Convolutional Neural Networks via Self Distillation [Zhang&nbsp;<em>et al.</em>, ICCV 2019]</figcaption>
+</figure>
+</div>
+<ul>
+<li><p>Use deeper layers to distill shallower layers.</p></li>
+<li><p>Intuition: Labels at later stages are more reliable, so the authors use them to supervise the predictions from the previous stages.</p></li>
+<li><p>Result</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 18.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. Be Your Own Teacher: Improve the Performance of Convolutional Neural Networks via Self Distillation [Zhang&nbsp;<em>et al.</em>, ICCV 2019]</figcaption>
+</figure>
+</div></li>
+</ul>
+</section>
+</section>
+<section id="distillation-for-different-tasks" class="level2">
+<h2 class="anchored" data-anchor-id="distillation-for-different-tasks"><strong>4. Distillation for different tasks</strong></h2>
+<p>이렇게 알아본 Knowledge Distillation은 어떤 Application에 사용될 수 있을까요? 강의는 Object Detection, Semantic Segmentation, GAN, Transformer 모델로 나눠서 이야기합니다. 각 부분마다 어떤 문제를 해결하는지 혹은 어떤 아이디어를 사용했는지만 짚고 넘어가볼게요(자세한 내용은 논문을 참조!).</p>
+<section id="object-detection" class="level3">
+<h3 class="anchored" data-anchor-id="object-detection">4.1 Object Detection</h3>
+<p>Object Detection은 세 가지로 해결해야할 문제가 늘어났습니다. 하나는 Classification, 그동안 해왔던 부분이구요, 다른 두 개는 Background와 Foreground을 구분하는 것과 Bounding block 문제 입니다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/object-detection-KD.gif" class="img-fluid figure-img"></p>
+<figcaption>Reference. Object Detection: Learning Efficient Object Detection Models with Knowledge Distillation [Chen&nbsp;<em>et al.</em>, NeurIPS 2017]</figcaption>
+</figure>
+</div>
+<p><a href="https://proceedings.neurips.cc/paper_files/paper/2017/file/e1e32e235eee1f970470a3a6658dfdd5-Paper.pdf">이 연구</a>는 Classifcation과 Background, Foreground 문제를 위해 세 가지 Loss를 사용합니다. 하나는 Feature, 그리고 Output Logit에서 Background, Foreground를 각각 다른 Weight를 준 Cross Entropy, 마지막은 Bounded 한 Regression Loss 입니다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 19.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. Localization: Localization Distillation for Dense Object Detection [Zheng&nbsp;<em>et al.</em>, CVPR 2022]</figcaption>
+</figure>
+</div>
+<p>그럼 Bounding block 은 어떻게 해결할까요? <a href="https://arxiv.org/pdf/2102.12252.pdf">이 논문</a>에서는 X축과 Y축으로 6개로 나눠진 구역에서 두 점으로 bounding block을 잡습니다. 이렇게 잡은 Bounding block의 분포를 Student Network가 학습하는 겁니다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Lecture_09-Knowledge-Distillation_(4).jpg" class="img-fluid figure-img"></p>
+<figcaption>Reference. Localization: Localization Distillation for Dense Object Detection [Zheng&nbsp;<em>et al.</em>, CVPR 2022]</figcaption>
+</figure>
+</div>
+</section>
+<section id="semantic-segmentation" class="level3">
+<h3 class="anchored" data-anchor-id="semantic-segmentation">4.2 Semantic Segmentation</h3>
+<p>두 번째 Task인 Semantic Segmentation에서는 Feature와 Output Logit에서 <strong>Pixel 단위로 Loss</strong>를 구한 다는 점, 그리고 <strong>Discriminator 모델</strong>을 가지고 학습을 시킨다는 점이 더해졌습니다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 20.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. Semantic Segmentation: Structured Knowledge Distillation for Semantic Segmentation [Liu&nbsp;<em>et al.</em>, CVPR 2019]</figcaption>
+</figure>
+</div>
+</section>
+<section id="gan" class="level3">
+<h3 class="anchored" data-anchor-id="gan">4.3 GAN</h3>
+<p>세번째 Task는 GAN 입니다. 매 Task 마다 feature map을 KD-loss로 가져가고 기존에 Output Logit은 동일하게 가져가네요. 추가로 해당 연구에서는 각 레이어마다 채널 수 중 성능이 가장 좋은 케이스에 한해 Fine-Tuning을 진행한다는 점이 있습니다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/GAN-KD.gif" class="img-fluid figure-img"></p>
+<figcaption>Reference. GAN: GAN Compression: Efficient Architectures for Interactive Conditional GANs [Li&nbsp;<em>et al.</em>, CVPR 2020]</figcaption>
+</figure>
+</div>
+</section>
+<section id="transformer" class="level3">
+<h3 class="anchored" data-anchor-id="transformer">4.4 Transformer</h3>
+<p>마지막은 Transformer 모델에서 Knowledge Distillation 입니다. Transformer는 Feature Map, Attention Map을 안 볼 수가 없는데요, 아래 그림에서 보면 attention transfer를 하고 하지 않은 경우하고 확실히 Teacher와 Attention map가 비교가 되네요.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Transformer-KD.gif" class="img-fluid figure-img"></p>
+<figcaption>Refernece. NLP: MobileBERT: a Compact Task-Agnostic BERT for Resource-Limited Devices [Sun&nbsp;<em>et al.</em>, ACL 2020]</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="network-augmentation-a-training-technique-for-tiny-machine-learning-models." class="level2">
+<h2 class="anchored" data-anchor-id="network-augmentation-a-training-technique-for-tiny-machine-learning-models.">5. Network Augmentation, <strong>a training technique for tiny machine learning models.</strong></h2>
+<p>지금까지 Task에 대해서 살펴봤는데요, 그럼 Tiny Model도 overfitting 문제가 있지 않을까요? 그레서 overfitting을 해결하는 방법에는 Data Augmentation이 있습니다. 아래 그림 처럼 Cutoff, Mixup, AutoAugment, Dropout과 같은 방법들이 있습니다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 21.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. Data Augmentation(AutoAugment: Learning Augmentation Policies from Data [Cubuk&nbsp;<em>et al.</em>, CVPR 2019])</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 22.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. Dropout(DropBlock: A regularization method for convolutional networks [Ghiasi&nbsp;<em>et al.</em>, NeurIPS 2018])</figcaption>
+</figure>
+</div>
+<p>하지만 Data Augmentation을 적용한 Tiny Model의 성능을 보시면 적용하는 방법마다 떨어지는 것을 확인할 수 있습니다. 그래서 여기서 제안한 아이디어가 “<strong>Network Augmentation</strong>” 입니다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 23.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. MIT-TinyML-lecture10-Knowledge-Distillation in <a href="https://efficientml.ai/">https://efficientml.ai</a></figcaption>
+</figure>
+</div>
+<ul>
+<li>Tiny Neural Network lacks capacity! → NetAug</li>
+</ul>
+<section id="network-augmentation" class="level3">
+<h3 class="anchored" data-anchor-id="network-augmentation">5.2 Network Augmentation</h3>
+<p>Network Augmentation은 기존에 디자인한 모델을 가지고 학습을 시킨 후, 원 모델과 <strong>각 레이어마다 파라미터를 변경한 모델을 함께 재학습을 시키는 방법</strong>입니다. 파라미터를 변경하는 모델같은 경우 <a href="https://tinyml-kor.github.io/blog/posts/labs/lab03.html">이전시간 실습</a>에 있으니 궁금하시면 참고해주세요. 실험결과는 1.3 ~ 1.8 % Tiny 모델이 성능 개선이 이뤄진 것을 볼 수 있어요. 여기서 원 모델(ResNet50)이 Evaluation에서는 이미 가진 데이터로 모델을 충분히 훈련시켰기 때문에 더이상 늘어나지 않는 것도 확인할 수 있겠네요.</p>
+<ul>
+<li><p>Training Process</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 24.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. Network Augmentation for Tiny Deep Learning [Cai&nbsp;<em>et al.</em>, ICLR 2022]</figcaption>
+</figure>
+</div>
+<p><span class="math display">\[
+  \mathscr{L}_{aug} = \mathscr{L}(W_{base}) + \alpha \mathscr{L}([W_{base}, W_{aug}])
+  \]</span></p>
+<ul>
+<li><span class="math inline">\(\mathscr{L}_{aug}\)</span> = base supervision + <span class="math inline">\(\alpha \cdot\)</span>auxiliary supervision</li>
+</ul></li>
+<li><p>Learning Curve</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 25.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. Network Augmentation for Tiny Deep Learning [Cai&nbsp;<em>et al.</em>, ICLR 2022]</figcaption>
+</figure>
+</div></li>
+<li><p>Result</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 26.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. Network Augmentation for Tiny Deep Learning [Cai&nbsp;<em>et al.</em>, ICLR 2022]</figcaption>
+</figure>
+</div></li>
+<li><p>Result for Transfer Learning</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../images/lec09/Untitled 27.png" class="img-fluid figure-img"></p>
+<figcaption>Reference. Network Augmentation for Tiny Deep Learning [Cai&nbsp;<em>et al.</em>, ICLR 2022]</figcaption>
+</figure>
+</div></li>
+</ul>
+<p>지금까지 Knowledge Distilation의 기법들 그리고 이를 이용한 Appllcation에 대해서 다뤄봤습니다. 다음 시간에는 TinyEngine을 위한 최적화 기법으로 다시 찾아올게요 🙂</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<script src="https://giscus.app/client.js" data-repo="TINYML-KOR/blog" data-repo-id="R_kgDOLC9iGA" data-category="General" data-category-id="DIC_kwDOLC9iGM4Cc7eP" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
+</script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="dark">
+</div> <!-- /content -->
+
+
+
+
+</body></html>
