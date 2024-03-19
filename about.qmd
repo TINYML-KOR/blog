@@ -43,30 +43,30 @@ about:
 - [x]  Lecture 3: Pruning and Sparsity (Part I) @ooshyun
 - [x]  Lecture 4: Pruning and Sparsity (Part II) @curieuxjy
 - [x]  Lab 1 @CastleFlag
-- [ ]  Lecture 5: Quantization (Part I) @ooshyun
-- [ ]  Lecture 6: Quantization (Part II) @ooshyun
-- [ ]  Lab 2  @curieuxjy
-- [ ]  Lecture 7: Neural Architecture Search (Part I) @CastleFlag
-- [ ]  Lecture 8: Neural Architecture Search (Part II) @CastleFlag
-- [ ]  Lab 3 @ooshyun
-- [ ]  Lecture 9: Knowledge Distillation @curieuxjy
-- [ ]  Lecture 10: MCUNet: TinyML on Microcontrollers @curieuxjy
-- [ ]  Lecture 11: TinyEngine and Parallel Processing @CastleFlag
+- [x]  Lecture 5: Quantization (Part I) @ooshyun
+- [x]  Lecture 6: Quantization (Part II) @ooshyun
+- [x]  Lab 2  @curieuxjy
+- [x]  Lecture 7: Neural Architecture Search (Part I) @CastleFlag
+- [x]  Lecture 8: Neural Architecture Search (Part II) @CastleFlag
+- [x]  Lab 3 @ooshyun
+- [x]  Lecture 9: Knowledge Distillation @ooshyun
+- [x]  Lecture 10: MCUNet: TinyML on Microcontrollers @curieuxjy
+- [x]  Lecture 11: TinyEngine and Parallel Processing @curieuxjy
 
 ### **[Chapter II: Domain-Specific Optimization]**
-- [ ]  Lecture 12: Transformer and LLM (Part I) @ooshyun
-- [ ]  Lecture 13: Transformer and LLM (Part II) @curieuxjy
-- [ ]  Lecture 14: Vision Transformer @CastleFlag
+- [ ]  Lecture 12: Transformer and LLM (Part I) @CastleFlag
+- [ ]  Lecture 13: Transformer and LLM (Part II) @CastleFlag
+- [ ]  Lecture 14: Vision Transformer @ooshyun
 - [ ]  Lab 4 @ooshyun
 - [ ]  Lecture 15: GAN, Video, and Point Cloud @curieuxjy
-- [ ]  Lecture 16: Diffusion Model @CastleFlag
-- [ ]  Lecture 17: Distributed Training (Part I) @ooshyun
-- [ ]  Lecture 18: Distributed Training (Part II) @curieuxjy
-- [ ]  Lab 5 @CastleFlag
+- [ ]  Lecture 16: Diffusion Model @curieuxjy
+- [ ]  Lecture 17: Distributed Training (Part I) @CastleFlag
+- [ ]  Lecture 18: Distributed Training (Part II) @CastleFlag
+- [ ]  Lab 5 @ooshyun
 - [ ]  Lecture 19: On-Device Training and Transfer Learning @ooshyun
 - [ ]  Lecture 20: Efficient Fine-tuning and Prompt Engineering @curieuxjy
 
 ### **[Chapter IV: Advanced Topics]**
-- [ ]  Lecture 21: Basics of Quantum Computing @CastleFlag
-- [ ]  Lecture 22: Quantum Machine Learning @ooshyun
-- [ ]  Lecture 23: Noise Robust Quantum ML @curieuxjy
+- [ ]  Lecture 21: Basics of Quantum Computing @curieuxjy
+- [ ]  Lecture 22: Quantum Machine Learning @CastleFlag
+- [ ]  Lecture 23: Noise Robust Quantum ML @CastleFlag
