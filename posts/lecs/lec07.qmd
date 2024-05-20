@@ -1,0 +1,247 @@
+---
+toc: true
+title: "🧑‍🏫 Lecture 7-8"
+description:  Neural Architecture Search
+author: "Gijeong Seong"
+date: "2024-03-12"
+categories: [lecture, NAS]
+---
+<style>
+p {
+  line-height: 2; /* Adjust the line-height property as needed */
+  text-align: justify;
+  text-justify: inter-word; /* Adjust the justification mode as needed */
+}
+
+.image-container {
+  text-align: center; /* Center-align the contents horizontally */
+}
+
+.centered-text {
+  text-align: center; /* Center-align the text within the container */
+}
+</style>
+
+이번 글에서는 Neural Architecture Search(이하 NAS)라는 기법을 소개한다. 
+NAS는 최적의 신경망 구조를 자동으로 발견하는 과정이다. 
+
+![](../../images/lec07/Pasted image 20240330181551.png)
+위 그림처럼, 기존에 모델을 개발할 때에는 레이어의 개수, 커널의 크기나 채널 개수등을 사람이 정해가며 만들었다면, NAS는 이를 자동화해서 가장 성능이 좋은 구조를 빠르게 찾는 것이다.
+이를 위해 search space 등을 사용하고 이는 뒤에서 설명토록 하겠다.
+
+# 1. Primitive operations
+이 챕터는 기본 연산을 다시 돌아본다. 
+강의에서 등장하는 연산으로 아래와 같은 연산이 있다.
+
+- Linear Layer
+- Convolution
+- Grouped Convolution
+- Depthwise Convolution
+- 1x1 Convolution
+각 연산에 대한 설명은 이 글에서는 하지 않고, 각 연산의 연산 수인 MACs(Multiply-ACumulate)만 짚는다.
+
+![](../../images/lec07/Pasted image 20240330201328.png)
+
+# 2. Classic building blocks
+1챕터와 마찬가지로, 기본적인 네트워크 구조들에 대해 돌아본다.
+강의에선 아래와 같은 네트워크가 등장한다
+
+- bottleneck block
+- grouped convolution
+- depthwise-separable block
+- inverted bottleneck block
+- grouped convolution & channel shuffle
+- multi-head self attention(transformer)
+
+위의 primitive operations와 building blocks에 대한 깊은 이해가 없어도, convolution 연산에 대한 기본적인 이해가 있다면 NAS를 이해하는데는 문제가 없다.
+
+# 3. Introduction to neural architecture search (NAS)
+이 챕터에서는 NAS가 무엇인지, 그리고 search space에 대해 설명한다.
+
+## 3.1 What is NAS?
+NAS는 앞서 설명한 대로, 최적의 신경망 구조를 자동으로 발견하는 과정이다. 
+![](../../images/lec07/Pasted image 20240330201742.png)
+위의 그래프에서, 원의 안쪽에 별(\*)로 표시된 모델이 NAS기반의 모델들이고, 실제로 사람이 제작한 모델보다 좋은 성능을 내는 것을 보여준다.
+(적은 연산수(MAC)으로 높은 Top-1 accuracy)
+![](../../images/lec07/Pasted image 20240330202619.png)
+NAS는 기본적으로 위의 그림과 같은 실행 구조이다.
+이를 순서대로 살펴보면 아래와 같다.
+1. Search Space에서 특정한 연산/네트워크를 고른다
+2. 그것들을 잘 조합해(Search Strategy) 적당한 구조를 만든다
+3. 조합한 구조(architecture)의 성능을 평가한다(performance estimation) 
+4. 1~3의 과정을 반복하며 최적의 모델을 찾는다.
+
+## 3.2 Search space
+그렇다면 Search space란 무엇일까? 
+Search space에는 두 가지 종류가 있다.
+
+1. Cell-level
+2. Network-level
+cell-level은 convolution같은 연산, network-level은 bottleneck같은 네트워크를 대상으로 그 중 하나를 선택하는 것이다.
+
+### 3.2.1 Cell-level
+![](../../images/lec07/Pasted image 20240330202630.png)
+위의 그림은 Cell-level의 선택을 RNN을 통해 진행하는 그림이다.
+이는 우측과 같은 구조의 네트워크를 만들자고 할 때, 각각 어떤 연산/입력으로 채울지를 고르는 것이다. 
+연산/입력을 고르는 과정은 다음과 같다.
+
+1. 어떤 입력을 사용할지(select one hidden state) 고른다
+2. 각 입력에 어떤 연산을 취할지(select operation for first/second hidden state) 고른다
+3. 연산을 취한 결과를 어떻게 합칠지(select method to combine 고른다
+
+이렇게 cell-level로 연산/입력을 바꿔가면서, 최적의 블록(에트워크)를 만드는 것이다.
+
+### 3.2.2 Network-level
+Network-level은 기존의 네트워크(ex. bottleneck)에서 여러 파라미터를 바꿔보며 최적화하는 것이다.
+네트워크의 depth, resolution, width, kernel size, topology등을 바꿔가며 변형해, 최적의 성능을 가지는 파라미터를 찾는다.
+
+![](../../images/lec07/Pasted image 20240330203102.png)
+위 그림은 depth를 변경하는 예시이다.
+그림처럼 bottleneck 블록을 얼마나 깊게(2~4) 만들지 정하는 것이다.
+
+## 3.3 Design the search space
+그렇다면, search space를 어떻게 정의해야 할까?
+kernel size를 3~100, depth도 3~100 이렇게 모두 고려할 수는 없다. 
+이를 모두 테스트(performance 측정) 해보려면 엄청난 시간이 걸릴 것이다.
+![](../../images/lec07/Pasted image 20240330203615.png)
+따라서 위 그림처럼 휴리스틱 방식등을 통해 더 좁은 search space에서 탐색한다면 시간을 줄일 수 있다.(search space optimization)
+![](../../images/lec07/Pasted image 20240330203643.png)
+좋은 search space를 만들기 위해서, FLOPS(연산수)를 활용할 수 있다.
+같은 메모리 조건에서 더 많은 연산을 진행하는 모델은, 더 나은 성능을 보일 것이기 때문이다.
+위 그림에서 검정 색의 선보다 빨간 선의 search space를 고르는 것이 더 좋은 모델을 얻을 확률이 높다
+(Larger FLOPS -> Larger model capacity -> More likey to give higher accuracy)
+
+## 3.4 Search strategy
+search space를 정의했다면, 어떤 식으로 탐색해야 할까?
+이 챕터에서는 5가지 방법을 다룬다.
+- Grid search
+- Random search
+- Reinforcement learning
+- Gradient descent
+- Evolutionary search
+
+### 3.4.1 Grid search
+![](../../images/lec07/Pasted image 20240330204404.png)
+grid search는 완전 탐색같은 방법이다. 
+위 그림처럼 가능한 모든 방법을 조합하며 최적을 찾는다.
+![](../../images/lec07/Pasted image 20240330204459.png)
+좀더 일반화하면, 위 그림처럼 depth, width, resolution등의 파라미터에 우측처럼 식을 세워서 기존 모델과의 FLOPS가 얼마나 차이나도 되는지 범위를 설정하며 grid search를 진행할 수 있다.
+
+### 3.4.2 Random search
+![](../../images/lec07/Pasted image 20240330204606.png)
+Random search는 말그래도 무작위로 고르는 것이다.
+최적화 측면에서 의미가 있다기 보다는, NAS 구현에 이상이 있는지 체크하는 sanity check 용도로 사용된다.
+
+### 3.4.3 Reinforcement learning
+![](../../images/lec07/Pasted image 20240330204653.png)
+Reinforcement learning은 말그대로 강화 학습(RL)을 이용한 방식이다.
+이전에 cell-level을 설명했을 때 사용했던 RNN같은 controller를 사용해 모델(architecture)을 만들고, 이를 평가한 결과를 RNN에 반영해 최적화하는 방식이다.
+
+### 3.4.4 Gradient descent
+![](../../images/lec07/Pasted image 20240330204858.png)
+Gradient descent방식을 적용할 수도 있다.
+그때마다 모델 평가를 하지 않아도 되기 때문에 더 computing efficient하다.
+위 그림 (c)에서 3가지 path를 기억했다가, 확률값 높은 곳을 선택하고 그 결과를 통해 gradient를 역전파한다.
+모든 선택(activation)을 메모리에 보관하고 있어야 한다는 단점이 있다.
+
+### 3.4.5 Evolutionary search
+![](../../images/lec07/Pasted image 20240330205108.png)
+Evelutionary search는 mutation-crossover 과정을 통해 모델을 변화시키며 최적의 모델을 찾아간다.
+![](../../images/lec07/Pasted image 20240330205158.png)
+mutation은 기존의 모델 구조를 변형시키는 과정이다. 
+위 그림에서 모델의 depth를 임의로 변형시키는 것처럼, width나 kernel size를 랜덤하게 변화시켜 muation된 네트워크를 만든다.
+![](../../images/lec07/Pasted image 20240330205252.png)
+그런 뒤, crossover를 통해 두 모델을 유전받는 것처럼 랜덤하게 합친다.
+이렇게 만든 새 모델을 평가해가며 최적의 모델을 찾는다.
+
+# 4. Efficient and Hardware-aware NAS
+이 챕터에서는 모델을 평가하는 방법(Performance estimation strategy)와 하드웨어에 맞춰 최적화하는 방식에 대해 다룬다
+
+## 4.1 Performance(Accuracy) estimation strategy
+![](../../images/lec07/Pasted image 20240330205856.png)
+앞의 NAS 구조 그림을 다시 보면, search space와 search strategy를 통해 만든 모델(구조)을 평가해야 한다.
+이 때 이 모델은 단순히 구조만 잡혀 있는 것이기에, 간단히 생각해보면 처음부터 다시 학습을 해야 모델의 성능을 측정할 수 있다.
+하지만 NAS 과정에서 굉장히 많은 구조를 만들게 되고, 이를 일일히 학습하면 엄청난 시간이 걸릴 것이다.
+어떤 식으로 해결하는지 살펴보자.
+
+### 4.1.1 Train from scratch
+![](../../images/lec07/Pasted image 20240330210126.png)
+앞서 말한 것처럼 가장 간단한 방법은 모든 구조를 학습해 보는 것이다.
+그러나 이는 CIFAR10이라는 작은 문제를 해결하는 모델을 학습하는데도 12800개의 모델을 학습해야 하고, 이는 22,400 GPU-hour라는 어마어마한 시간이 걸린다.
+
+### 4.1.2 Inherit weight
+![](../../images/lec07/Pasted image 20240330210240.png)
+그래서 등장한 방식이, 기존에 학습한 weight는 가만히 둔 채, 새로운 node를 추가하는 방식이다.
+위 그림에서 Net2Wider는 기존 모델에서 width를 추가하고, Net2Deeper는 depth를 추가하고 기존 모델(parent model)의 weight를 적당히 계승한다.
+이렇게 하면 새로 처음부터 학습하지 않아도 된다.
+
+### 4.1.3 Hypernetwork
+![](../../images/lec07/Pasted image 20240330211002.png)
+Hypernetwork는 모델의 구조를 보고 그 모델의 weight를 예측하는 방식을 사용한다.
+GNN을 통해 topology(모델 구조)에 대한 feature를 추출해 weight을 예측한다.
+
+## 4.2 Zero-shot NAS
+그렇다면 아예 train 하지 않고 NAS할 수 없을까?
+1. ZenNAS
+2. GradSign
+두 가지 방법이 있지만, 그다지 좋은 방법은 아니다.
+### 4.2.1 ZenNAS
+ZenNAS는 좋은 모델은 입력의 변화에 민감할 것이라는 가정을 통해 좋은 모델을 찾고자 한다.
+과정은 아래와 같다.
+
+1. 정규분포(N)을 따르는 임의의 입력 x를 만든다
+2. x를 살짝 변형한 x'을 만든다.
+3. x와 x'을 입력으로 사용한 모델의 결과를 비교해, 큰 차이가 없다면 나쁜 모델로 본다.
+이 방법은 우리가 언뜻 생각하기에도 좋은 방법은 아니다. 
+
+### 4.2.2 GradSign
+![](../../images/lec07/Pasted image 20240330211919.png)
+GradSign은 좋은 모델이 sample간에 local minima가 비슷한 위치에 분포할 것이라는 가정을 통해 좋은 모델을 찾고자 한다.
+local minima가 비슷한 위치라면(위 그림의 오른쪽),두 sample간에 gradient가 같은 부호(Sign)을 가질 것이고 이를 통해 좋은 모델인지 판단한다.
+(만약 부호가 같다면 모두 더했을 때 절댓값이 더 클 것이다)
+
+## 4.3 Hardware-aware NAS
+![](../../images/lec07/Pasted image 20240330212920.png)
+오른쪽 그림처럼, 같은 모델을 여러 디바이스에 탑재하려면, 각각의 디바이스에 최적화덴 모델을 만들어야 하고, NAS 과정에서도 이에 대한 고려가 필요하다
+![](../../images/lec07/Pasted image 20240330214103.png)
+그런데, 디바이스에 최적화 한다는 것은 MACs를 단순히 계산하는 것과는 다르다.
+위 그림처럼 MACs는 더 적지만, latency가 더 늘어날 수도 있다.
+디바이스 환경에서 가장 중요한 지표는 latency이다.
+![](../../images/lec07/Pasted image 20240330213031.png)
+그런데 각각의 디바이스에서 모델의 latency를 평가하는 것은 굉장히 어렵고, 느리다.
+![](../../images/lec07/Pasted image 20240330214026.png)
+따라서 사용할 수 있는 방법은, latency를 임의로 예측하는 것이다.
+latency를 예측하는 방법으로는
+1. latency lookup table
+2. network-wise latency profiling
+등이 있다.
+
+### 4.3.1 latency lookup table
+![](../../images/lec07/Pasted image 20240330215350.png)
+모델 구조와, 사용하는 연산(Op)의 latency(Lat)을 입력으로 주면, 해당 입력을 보고 산술적으로 +-해 계산하는 방식이다
+
+### 4.3.2 network-wise latency profiling
+![](../../images/lec07/Pasted image 20240330215434.png)
+kernel size와 width등을 입력으로하는 ML 모델을 만들어서 latency를 측정하는 방식이다
+![](../../images/lec07/Pasted image 20240330215513.png)
+이렇게 latency를 예측하는 방법은, 꽤나 높은 정확도를 보인다
+
+## 4.4 Neural-hardware architecture co-search
+![](../../images/lec07/Pasted image 20240330215633.png)
+NAS는 모델의 구조만 잘 바꾼다고 되는 것이 아니라, 하드웨어 또한 고려해야 한다.
+![](../../images/lec07/Pasted image 20240330215819.png)
+Local Buffer Size, Global Buffer size, \#PE처럼 단순히 숫자(sizing)에 관한 것도 있지만, Compute Array Size처럼 조금더 복합적으로 영향을 미치는 파라미터도 있다.
+
+# 5. NAS applications
+
+## 5.1 NLP, GAN, point cloud, pose
+NAS의 활용 예시들이다. 강의 슬라이드만 간단히 첨부한다
+![](../../images/lec07/Pasted image 20240330220150.png)
+![](../../images/lec07/Pasted image 20240330220158.png)
+![](../../images/lec07/Pasted image 20240330220209.png)
+얼굴 사진을 가지고 표정, 노화 정도등을 실시간으로 조정해보는 어플리케이션이다.
+NAS의 좋은 활용 예시인데, 작은 모델(small sub-net)으로는 실시간 변동에 대응하고, 큰 모델(large sub-net)로는 확정되는 이미지를 제작할 때 사용한다.
+
+
+여기까지 NAS 설명을 정리한 글입니다.
+강의 내용을 많이 요약했기 때문에, 더 자세한 내용은 강의(https://hanlab.mit.edu/courses/2023-fall-65940)의 7-8강을 참조 부탁드립니다.

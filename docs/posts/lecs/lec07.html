@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.554">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Gijeong Seong">
+<meta name="dcterms.date" content="2024-03-12">
+<meta name="description" content="Neural Architecture Search">
+
+<title>TinyML KOR - 🧑‍🏫 Lecture 7-8</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">TinyML KOR</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">TinyML Study Group</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#primitive-operations" id="toc-primitive-operations" class="nav-link active" data-scroll-target="#primitive-operations">1. Primitive operations</a></li>
+  <li><a href="#classic-building-blocks" id="toc-classic-building-blocks" class="nav-link" data-scroll-target="#classic-building-blocks">2. Classic building blocks</a></li>
+  <li><a href="#introduction-to-neural-architecture-search-nas" id="toc-introduction-to-neural-architecture-search-nas" class="nav-link" data-scroll-target="#introduction-to-neural-architecture-search-nas">3. Introduction to neural architecture search (NAS)</a>
+  <ul class="collapse">
+  <li><a href="#what-is-nas" id="toc-what-is-nas" class="nav-link" data-scroll-target="#what-is-nas">3.1 What is NAS?</a></li>
+  <li><a href="#search-space" id="toc-search-space" class="nav-link" data-scroll-target="#search-space">3.2 Search space</a>
+  <ul class="collapse">
+  <li><a href="#cell-level" id="toc-cell-level" class="nav-link" data-scroll-target="#cell-level">3.2.1 Cell-level</a></li>
+  <li><a href="#network-level" id="toc-network-level" class="nav-link" data-scroll-target="#network-level">3.2.2 Network-level</a></li>
+  </ul></li>
+  <li><a href="#design-the-search-space" id="toc-design-the-search-space" class="nav-link" data-scroll-target="#design-the-search-space">3.3 Design the search space</a></li>
+  <li><a href="#search-strategy" id="toc-search-strategy" class="nav-link" data-scroll-target="#search-strategy">3.4 Search strategy</a>
+  <ul class="collapse">
+  <li><a href="#grid-search" id="toc-grid-search" class="nav-link" data-scroll-target="#grid-search">3.4.1 Grid search</a></li>
+  <li><a href="#random-search" id="toc-random-search" class="nav-link" data-scroll-target="#random-search">3.4.2 Random search</a></li>
+  <li><a href="#reinforcement-learning" id="toc-reinforcement-learning" class="nav-link" data-scroll-target="#reinforcement-learning">3.4.3 Reinforcement learning</a></li>
+  <li><a href="#gradient-descent" id="toc-gradient-descent" class="nav-link" data-scroll-target="#gradient-descent">3.4.4 Gradient descent</a></li>
+  <li><a href="#evolutionary-search" id="toc-evolutionary-search" class="nav-link" data-scroll-target="#evolutionary-search">3.4.5 Evolutionary search</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#efficient-and-hardware-aware-nas" id="toc-efficient-and-hardware-aware-nas" class="nav-link" data-scroll-target="#efficient-and-hardware-aware-nas">4. Efficient and Hardware-aware NAS</a>
+  <ul class="collapse">
+  <li><a href="#performanceaccuracy-estimation-strategy" id="toc-performanceaccuracy-estimation-strategy" class="nav-link" data-scroll-target="#performanceaccuracy-estimation-strategy">4.1 Performance(Accuracy) estimation strategy</a>
+  <ul class="collapse">
+  <li><a href="#train-from-scratch" id="toc-train-from-scratch" class="nav-link" data-scroll-target="#train-from-scratch">4.1.1 Train from scratch</a></li>
+  <li><a href="#inherit-weight" id="toc-inherit-weight" class="nav-link" data-scroll-target="#inherit-weight">4.1.2 Inherit weight</a></li>
+  <li><a href="#hypernetwork" id="toc-hypernetwork" class="nav-link" data-scroll-target="#hypernetwork">4.1.3 Hypernetwork</a></li>
+  </ul></li>
+  <li><a href="#zero-shot-nas" id="toc-zero-shot-nas" class="nav-link" data-scroll-target="#zero-shot-nas">4.2 Zero-shot NAS</a>
+  <ul class="collapse">
+  <li><a href="#gradsign" id="toc-gradsign" class="nav-link" data-scroll-target="#gradsign">4.2.2 GradSign</a></li>
+  </ul></li>
+  <li><a href="#hardware-aware-nas" id="toc-hardware-aware-nas" class="nav-link" data-scroll-target="#hardware-aware-nas">4.3 Hardware-aware NAS</a>
+  <ul class="collapse">
+  <li><a href="#latency-lookup-table" id="toc-latency-lookup-table" class="nav-link" data-scroll-target="#latency-lookup-table">4.3.1 latency lookup table</a></li>
+  <li><a href="#network-wise-latency-profiling" id="toc-network-wise-latency-profiling" class="nav-link" data-scroll-target="#network-wise-latency-profiling">4.3.2 network-wise latency profiling</a></li>
+  </ul></li>
+  <li><a href="#neural-hardware-architecture-co-search" id="toc-neural-hardware-architecture-co-search" class="nav-link" data-scroll-target="#neural-hardware-architecture-co-search">4.4 Neural-hardware architecture co-search</a></li>
+  </ul></li>
+  <li><a href="#nas-applications" id="toc-nas-applications" class="nav-link" data-scroll-target="#nas-applications">5. NAS applications</a>
+  <ul class="collapse">
+  <li><a href="#nlp-gan-point-cloud-pose" id="toc-nlp-gan-point-cloud-pose" class="nav-link" data-scroll-target="#nlp-gan-point-cloud-pose">5.1 NLP, GAN, point cloud, pose</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">🧑‍🏫 Lecture 7-8</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">lecture</div>
+    <div class="quarto-category">NAS</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Neural Architecture Search
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Gijeong Seong </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 12, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<style>
+p {
+  line-height: 2; /* Adjust the line-height property as needed */
+  text-align: justify;
+  text-justify: inter-word; /* Adjust the justification mode as needed */
+}
+
+.image-container {
+  text-align: center; /* Center-align the contents horizontally */
+}
+
+.centered-text {
+  text-align: center; /* Center-align the text within the container */
+}
+</style>
+<p>이번 글에서는 Neural Architecture Search(이하 NAS)라는 기법을 소개한다. NAS는 최적의 신경망 구조를 자동으로 발견하는 과정이다.</p>
+<p><img src="../../images/lec07/Pasted image 20240330181551.png" class="img-fluid"> 위 그림처럼, 기존에 모델을 개발할 때에는 레이어의 개수, 커널의 크기나 채널 개수등을 사람이 정해가며 만들었다면, NAS는 이를 자동화해서 가장 성능이 좋은 구조를 빠르게 찾는 것이다. 이를 위해 search space 등을 사용하고 이는 뒤에서 설명토록 하겠다.</p>
+<section id="primitive-operations" class="level1">
+<h1>1. Primitive operations</h1>
+<p>이 챕터는 기본 연산을 다시 돌아본다. 강의에서 등장하는 연산으로 아래와 같은 연산이 있다.</p>
+<ul>
+<li>Linear Layer</li>
+<li>Convolution</li>
+<li>Grouped Convolution</li>
+<li>Depthwise Convolution</li>
+<li>1x1 Convolution 각 연산에 대한 설명은 이 글에서는 하지 않고, 각 연산의 연산 수인 MACs(Multiply-ACumulate)만 짚는다.</li>
+</ul>
+<p><img src="../../images/lec07/Pasted image 20240330201328.png" class="img-fluid"></p>
+</section>
+<section id="classic-building-blocks" class="level1">
+<h1>2. Classic building blocks</h1>
+<p>1챕터와 마찬가지로, 기본적인 네트워크 구조들에 대해 돌아본다. 강의에선 아래와 같은 네트워크가 등장한다</p>
+<ul>
+<li>bottleneck block</li>
+<li>grouped convolution</li>
+<li>depthwise-separable block</li>
+<li>inverted bottleneck block</li>
+<li>grouped convolution &amp; channel shuffle</li>
+<li>multi-head self attention(transformer)</li>
+</ul>
+<p>위의 primitive operations와 building blocks에 대한 깊은 이해가 없어도, convolution 연산에 대한 기본적인 이해가 있다면 NAS를 이해하는데는 문제가 없다.</p>
+</section>
+<section id="introduction-to-neural-architecture-search-nas" class="level1">
+<h1>3. Introduction to neural architecture search (NAS)</h1>
+<p>이 챕터에서는 NAS가 무엇인지, 그리고 search space에 대해 설명한다.</p>
+<section id="what-is-nas" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-nas">3.1 What is NAS?</h2>
+<p>NAS는 앞서 설명한 대로, 최적의 신경망 구조를 자동으로 발견하는 과정이다. <img src="../../images/lec07/Pasted image 20240330201742.png" class="img-fluid"> 위의 그래프에서, 원의 안쪽에 별(*)로 표시된 모델이 NAS기반의 모델들이고, 실제로 사람이 제작한 모델보다 좋은 성능을 내는 것을 보여준다. (적은 연산수(MAC)으로 높은 Top-1 accuracy) <img src="../../images/lec07/Pasted image 20240330202619.png" class="img-fluid"> NAS는 기본적으로 위의 그림과 같은 실행 구조이다. 이를 순서대로 살펴보면 아래와 같다. 1. Search Space에서 특정한 연산/네트워크를 고른다 2. 그것들을 잘 조합해(Search Strategy) 적당한 구조를 만든다 3. 조합한 구조(architecture)의 성능을 평가한다(performance estimation) 4. 1~3의 과정을 반복하며 최적의 모델을 찾는다.</p>
+</section>
+<section id="search-space" class="level2">
+<h2 class="anchored" data-anchor-id="search-space">3.2 Search space</h2>
+<p>그렇다면 Search space란 무엇일까? Search space에는 두 가지 종류가 있다.</p>
+<ol type="1">
+<li>Cell-level</li>
+<li>Network-level cell-level은 convolution같은 연산, network-level은 bottleneck같은 네트워크를 대상으로 그 중 하나를 선택하는 것이다.</li>
+</ol>
+<section id="cell-level" class="level3">
+<h3 class="anchored" data-anchor-id="cell-level">3.2.1 Cell-level</h3>
+<p><img src="../../images/lec07/Pasted image 20240330202630.png" class="img-fluid"> 위의 그림은 Cell-level의 선택을 RNN을 통해 진행하는 그림이다. 이는 우측과 같은 구조의 네트워크를 만들자고 할 때, 각각 어떤 연산/입력으로 채울지를 고르는 것이다. 연산/입력을 고르는 과정은 다음과 같다.</p>
+<ol type="1">
+<li>어떤 입력을 사용할지(select one hidden state) 고른다</li>
+<li>각 입력에 어떤 연산을 취할지(select operation for first/second hidden state) 고른다</li>
+<li>연산을 취한 결과를 어떻게 합칠지(select method to combine 고른다</li>
+</ol>
+<p>이렇게 cell-level로 연산/입력을 바꿔가면서, 최적의 블록(에트워크)를 만드는 것이다.</p>
+</section>
+<section id="network-level" class="level3">
+<h3 class="anchored" data-anchor-id="network-level">3.2.2 Network-level</h3>
+<p>Network-level은 기존의 네트워크(ex. bottleneck)에서 여러 파라미터를 바꿔보며 최적화하는 것이다. 네트워크의 depth, resolution, width, kernel size, topology등을 바꿔가며 변형해, 최적의 성능을 가지는 파라미터를 찾는다.</p>
+<p><img src="../../images/lec07/Pasted image 20240330203102.png" class="img-fluid"> 위 그림은 depth를 변경하는 예시이다. 그림처럼 bottleneck 블록을 얼마나 깊게(2~4) 만들지 정하는 것이다.</p>
+</section>
+</section>
+<section id="design-the-search-space" class="level2">
+<h2 class="anchored" data-anchor-id="design-the-search-space">3.3 Design the search space</h2>
+<p>그렇다면, search space를 어떻게 정의해야 할까? kernel size를 3~100, depth도 3~100 이렇게 모두 고려할 수는 없다. 이를 모두 테스트(performance 측정) 해보려면 엄청난 시간이 걸릴 것이다. <img src="../../images/lec07/Pasted image 20240330203615.png" class="img-fluid"> 따라서 위 그림처럼 휴리스틱 방식등을 통해 더 좁은 search space에서 탐색한다면 시간을 줄일 수 있다.(search space optimization) <img src="../../images/lec07/Pasted image 20240330203643.png" class="img-fluid"> 좋은 search space를 만들기 위해서, FLOPS(연산수)를 활용할 수 있다. 같은 메모리 조건에서 더 많은 연산을 진행하는 모델은, 더 나은 성능을 보일 것이기 때문이다. 위 그림에서 검정 색의 선보다 빨간 선의 search space를 고르는 것이 더 좋은 모델을 얻을 확률이 높다 (Larger FLOPS -&gt; Larger model capacity -&gt; More likey to give higher accuracy)</p>
+</section>
+<section id="search-strategy" class="level2">
+<h2 class="anchored" data-anchor-id="search-strategy">3.4 Search strategy</h2>
+<p>search space를 정의했다면, 어떤 식으로 탐색해야 할까? 이 챕터에서는 5가지 방법을 다룬다. - Grid search - Random search - Reinforcement learning - Gradient descent - Evolutionary search</p>
+<section id="grid-search" class="level3">
+<h3 class="anchored" data-anchor-id="grid-search">3.4.1 Grid search</h3>
+<p><img src="../../images/lec07/Pasted image 20240330204404.png" class="img-fluid"> grid search는 완전 탐색같은 방법이다. 위 그림처럼 가능한 모든 방법을 조합하며 최적을 찾는다. <img src="../../images/lec07/Pasted image 20240330204459.png" class="img-fluid"> 좀더 일반화하면, 위 그림처럼 depth, width, resolution등의 파라미터에 우측처럼 식을 세워서 기존 모델과의 FLOPS가 얼마나 차이나도 되는지 범위를 설정하며 grid search를 진행할 수 있다.</p>
+</section>
+<section id="random-search" class="level3">
+<h3 class="anchored" data-anchor-id="random-search">3.4.2 Random search</h3>
+<p><img src="../../images/lec07/Pasted image 20240330204606.png" class="img-fluid"> Random search는 말그래도 무작위로 고르는 것이다. 최적화 측면에서 의미가 있다기 보다는, NAS 구현에 이상이 있는지 체크하는 sanity check 용도로 사용된다.</p>
+</section>
+<section id="reinforcement-learning" class="level3">
+<h3 class="anchored" data-anchor-id="reinforcement-learning">3.4.3 Reinforcement learning</h3>
+<p><img src="../../images/lec07/Pasted image 20240330204653.png" class="img-fluid"> Reinforcement learning은 말그대로 강화 학습(RL)을 이용한 방식이다. 이전에 cell-level을 설명했을 때 사용했던 RNN같은 controller를 사용해 모델(architecture)을 만들고, 이를 평가한 결과를 RNN에 반영해 최적화하는 방식이다.</p>
+</section>
+<section id="gradient-descent" class="level3">
+<h3 class="anchored" data-anchor-id="gradient-descent">3.4.4 Gradient descent</h3>
+<p><img src="../../images/lec07/Pasted image 20240330204858.png" class="img-fluid"> Gradient descent방식을 적용할 수도 있다. 그때마다 모델 평가를 하지 않아도 되기 때문에 더 computing efficient하다. 위 그림 (c)에서 3가지 path를 기억했다가, 확률값 높은 곳을 선택하고 그 결과를 통해 gradient를 역전파한다. 모든 선택(activation)을 메모리에 보관하고 있어야 한다는 단점이 있다.</p>
+</section>
+<section id="evolutionary-search" class="level3">
+<h3 class="anchored" data-anchor-id="evolutionary-search">3.4.5 Evolutionary search</h3>
+<p><img src="../../images/lec07/Pasted image 20240330205108.png" class="img-fluid"> Evelutionary search는 mutation-crossover 과정을 통해 모델을 변화시키며 최적의 모델을 찾아간다. <img src="../../images/lec07/Pasted image 20240330205158.png" class="img-fluid"> mutation은 기존의 모델 구조를 변형시키는 과정이다. 위 그림에서 모델의 depth를 임의로 변형시키는 것처럼, width나 kernel size를 랜덤하게 변화시켜 muation된 네트워크를 만든다. <img src="../../images/lec07/Pasted image 20240330205252.png" class="img-fluid"> 그런 뒤, crossover를 통해 두 모델을 유전받는 것처럼 랜덤하게 합친다. 이렇게 만든 새 모델을 평가해가며 최적의 모델을 찾는다.</p>
+</section>
+</section>
+</section>
+<section id="efficient-and-hardware-aware-nas" class="level1">
+<h1>4. Efficient and Hardware-aware NAS</h1>
+<p>이 챕터에서는 모델을 평가하는 방법(Performance estimation strategy)와 하드웨어에 맞춰 최적화하는 방식에 대해 다룬다</p>
+<section id="performanceaccuracy-estimation-strategy" class="level2">
+<h2 class="anchored" data-anchor-id="performanceaccuracy-estimation-strategy">4.1 Performance(Accuracy) estimation strategy</h2>
+<p><img src="../../images/lec07/Pasted image 20240330205856.png" class="img-fluid"> 앞의 NAS 구조 그림을 다시 보면, search space와 search strategy를 통해 만든 모델(구조)을 평가해야 한다. 이 때 이 모델은 단순히 구조만 잡혀 있는 것이기에, 간단히 생각해보면 처음부터 다시 학습을 해야 모델의 성능을 측정할 수 있다. 하지만 NAS 과정에서 굉장히 많은 구조를 만들게 되고, 이를 일일히 학습하면 엄청난 시간이 걸릴 것이다. 어떤 식으로 해결하는지 살펴보자.</p>
+<section id="train-from-scratch" class="level3">
+<h3 class="anchored" data-anchor-id="train-from-scratch">4.1.1 Train from scratch</h3>
+<p><img src="../../images/lec07/Pasted image 20240330210126.png" class="img-fluid"> 앞서 말한 것처럼 가장 간단한 방법은 모든 구조를 학습해 보는 것이다. 그러나 이는 CIFAR10이라는 작은 문제를 해결하는 모델을 학습하는데도 12800개의 모델을 학습해야 하고, 이는 22,400 GPU-hour라는 어마어마한 시간이 걸린다.</p>
+</section>
+<section id="inherit-weight" class="level3">
+<h3 class="anchored" data-anchor-id="inherit-weight">4.1.2 Inherit weight</h3>
+<p><img src="../../images/lec07/Pasted image 20240330210240.png" class="img-fluid"> 그래서 등장한 방식이, 기존에 학습한 weight는 가만히 둔 채, 새로운 node를 추가하는 방식이다. 위 그림에서 Net2Wider는 기존 모델에서 width를 추가하고, Net2Deeper는 depth를 추가하고 기존 모델(parent model)의 weight를 적당히 계승한다. 이렇게 하면 새로 처음부터 학습하지 않아도 된다.</p>
+</section>
+<section id="hypernetwork" class="level3">
+<h3 class="anchored" data-anchor-id="hypernetwork">4.1.3 Hypernetwork</h3>
+<p><img src="../../images/lec07/Pasted image 20240330211002.png" class="img-fluid"> Hypernetwork는 모델의 구조를 보고 그 모델의 weight를 예측하는 방식을 사용한다. GNN을 통해 topology(모델 구조)에 대한 feature를 추출해 weight을 예측한다.</p>
+</section>
+</section>
+<section id="zero-shot-nas" class="level2">
+<h2 class="anchored" data-anchor-id="zero-shot-nas">4.2 Zero-shot NAS</h2>
+<p>그렇다면 아예 train 하지 않고 NAS할 수 없을까? 1. ZenNAS 2. GradSign 두 가지 방법이 있지만, 그다지 좋은 방법은 아니다. ### 4.2.1 ZenNAS ZenNAS는 좋은 모델은 입력의 변화에 민감할 것이라는 가정을 통해 좋은 모델을 찾고자 한다. 과정은 아래와 같다.</p>
+<ol type="1">
+<li>정규분포(N)을 따르는 임의의 입력 x를 만든다</li>
+<li>x를 살짝 변형한 x’을 만든다.</li>
+<li>x와 x’을 입력으로 사용한 모델의 결과를 비교해, 큰 차이가 없다면 나쁜 모델로 본다. 이 방법은 우리가 언뜻 생각하기에도 좋은 방법은 아니다.</li>
+</ol>
+<section id="gradsign" class="level3">
+<h3 class="anchored" data-anchor-id="gradsign">4.2.2 GradSign</h3>
+<p><img src="../../images/lec07/Pasted image 20240330211919.png" class="img-fluid"> GradSign은 좋은 모델이 sample간에 local minima가 비슷한 위치에 분포할 것이라는 가정을 통해 좋은 모델을 찾고자 한다. local minima가 비슷한 위치라면(위 그림의 오른쪽),두 sample간에 gradient가 같은 부호(Sign)을 가질 것이고 이를 통해 좋은 모델인지 판단한다. (만약 부호가 같다면 모두 더했을 때 절댓값이 더 클 것이다)</p>
+</section>
+</section>
+<section id="hardware-aware-nas" class="level2">
+<h2 class="anchored" data-anchor-id="hardware-aware-nas">4.3 Hardware-aware NAS</h2>
+<p><img src="../../images/lec07/Pasted image 20240330212920.png" class="img-fluid"> 오른쪽 그림처럼, 같은 모델을 여러 디바이스에 탑재하려면, 각각의 디바이스에 최적화덴 모델을 만들어야 하고, NAS 과정에서도 이에 대한 고려가 필요하다 <img src="../../images/lec07/Pasted image 20240330214103.png" class="img-fluid"> 그런데, 디바이스에 최적화 한다는 것은 MACs를 단순히 계산하는 것과는 다르다. 위 그림처럼 MACs는 더 적지만, latency가 더 늘어날 수도 있다. 디바이스 환경에서 가장 중요한 지표는 latency이다. <img src="../../images/lec07/Pasted image 20240330213031.png" class="img-fluid"> 그런데 각각의 디바이스에서 모델의 latency를 평가하는 것은 굉장히 어렵고, 느리다. <img src="../../images/lec07/Pasted image 20240330214026.png" class="img-fluid"> 따라서 사용할 수 있는 방법은, latency를 임의로 예측하는 것이다. latency를 예측하는 방법으로는 1. latency lookup table 2. network-wise latency profiling 등이 있다.</p>
+<section id="latency-lookup-table" class="level3">
+<h3 class="anchored" data-anchor-id="latency-lookup-table">4.3.1 latency lookup table</h3>
+<p><img src="../../images/lec07/Pasted image 20240330215350.png" class="img-fluid"> 모델 구조와, 사용하는 연산(Op)의 latency(Lat)을 입력으로 주면, 해당 입력을 보고 산술적으로 +-해 계산하는 방식이다</p>
+</section>
+<section id="network-wise-latency-profiling" class="level3">
+<h3 class="anchored" data-anchor-id="network-wise-latency-profiling">4.3.2 network-wise latency profiling</h3>
+<p><img src="../../images/lec07/Pasted image 20240330215434.png" class="img-fluid"> kernel size와 width등을 입력으로하는 ML 모델을 만들어서 latency를 측정하는 방식이다 <img src="../../images/lec07/Pasted image 20240330215513.png" class="img-fluid"> 이렇게 latency를 예측하는 방법은, 꽤나 높은 정확도를 보인다</p>
+</section>
+</section>
+<section id="neural-hardware-architecture-co-search" class="level2">
+<h2 class="anchored" data-anchor-id="neural-hardware-architecture-co-search">4.4 Neural-hardware architecture co-search</h2>
+<p><img src="../../images/lec07/Pasted image 20240330215633.png" class="img-fluid"> NAS는 모델의 구조만 잘 바꾼다고 되는 것이 아니라, 하드웨어 또한 고려해야 한다. <img src="../../images/lec07/Pasted image 20240330215819.png" class="img-fluid"> Local Buffer Size, Global Buffer size, #PE처럼 단순히 숫자(sizing)에 관한 것도 있지만, Compute Array Size처럼 조금더 복합적으로 영향을 미치는 파라미터도 있다.</p>
+</section>
+</section>
+<section id="nas-applications" class="level1">
+<h1>5. NAS applications</h1>
+<section id="nlp-gan-point-cloud-pose" class="level2">
+<h2 class="anchored" data-anchor-id="nlp-gan-point-cloud-pose">5.1 NLP, GAN, point cloud, pose</h2>
+<p>NAS의 활용 예시들이다. 강의 슬라이드만 간단히 첨부한다 <img src="../../images/lec07/Pasted image 20240330220150.png" class="img-fluid"> <img src="../../images/lec07/Pasted image 20240330220158.png" class="img-fluid"> <img src="../../images/lec07/Pasted image 20240330220209.png" class="img-fluid"> 얼굴 사진을 가지고 표정, 노화 정도등을 실시간으로 조정해보는 어플리케이션이다. NAS의 좋은 활용 예시인데, 작은 모델(small sub-net)으로는 실시간 변동에 대응하고, 큰 모델(large sub-net)로는 확정되는 이미지를 제작할 때 사용한다.</p>
+<p>여기까지 NAS 설명을 정리한 글입니다. 강의 내용을 많이 요약했기 때문에, 더 자세한 내용은 강의(https://hanlab.mit.edu/courses/2023-fall-65940)의 7-8강을 참조 부탁드립니다.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<script src="https://giscus.app/client.js" data-repo="TINYML-KOR/blog" data-repo-id="R_kgDOLC9iGA" data-category="General" data-category-id="DIC_kwDOLC9iGM4Cc7eP" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
+</script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="dark">
+</div> <!-- /content -->
+
+
+
+
+</body></html>
